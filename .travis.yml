@@ -68,3 +68,28 @@ jobs:
       script:
         - *base_script
         - travis_wait 60 valgrind --error-exitcode=1 -- SvtAv1EncApp --preset 4 -i akiyo_cif.y4m -n 20 -b test1.ivf
+    - name: Coverity Scan
+      if: branch = coverity_scan
+      env:
+        - secure: "exR1JqfUVDGu1GpiMfYUW9o4j+Jer0V9P7x/UPpHfGUennBUI5G5/A9bBc/04oqk8NjD3wNBigjhcSGHlzjpnvhEegW+/eP/kttFnlia87qhuAhVWQeEL268eZ9SVqJ0QOSM+jZs1cw2Pp/Px2Q1ZHVAK9HZwSi+PdSAQRPgBHcV3S4Ye2roGh2iqzFq7JLFsrWmdAreMCloK7gIZuSFGNT3OlWkaGFhdeKWWFMdUbMGrKutadSOXJ2PYazRdED7enXHL5L7iNYRUIE862QXv7b37NK4ts+2wsmX2v6TpmKiyC9C32Mu3nXQGd7Xc9oIJEvkLuTX/crlbJbs0zkq1EfngGLKjkPyoNwgbzpp4PFVssdGU45EiiGoMHYs9STCFmvkr4oek/vln1WjRwg6p+IplaHMZtnIfyaFqW6t1l0QtIOKs4dHXAvYMXbKr65NNtj5cPNKQoExWC94A+HvpMUWr+R7rNH1jX3Jc407gbcVNpBBPhoYBKJwOhurrkJ0l6uEy5ehJNRHP9zINtBKno3uaaeBL5a9vQ0JLVrEqMKrgzPpLxnTefJG63KJfznVrheo+RfvS+k2MGrTzbuBU5wHy/Reoxcqdre1rheN7IK59B8V75/4hlg+6d1x50/8RzuI/Visj0hFepbV7puTUpFB4b0AsfGVDwJfr6UK1eI="
+      addons:
+        coverity_scan:
+          project:
+            name: "1480c1/SVT-AV1"
+            description: "The Scalable Video Technology for AV1 Encoder (SVT-AV1 Encoder) is an AV1-compliant encoder library core"
+          notification_email: ccom@randomderp.com
+          build_command_prepend: "cd Build && cmake .. -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF"
+          build_command: "make -j2"
+          branch_pattern: "coverity_scan"
+        apt:
+          packages:
+            - yasm
+            - cmake
+      before_install:
+        - "sudo chown -R travis: $HOME/.ccache"
+        - echo -n | openssl s_client -connect "https://scan.coverity.com:443" | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt
+        - wget -nc https://raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master/video.tar.gz || wget -nc http://randomderp.com/video.tar.gz
+        - tar xf video.tar.gz
+        - mkdir -p $TRAVIS_BUILD_DIR/Build/linux/${build_type:=Release}
+      install: true
+      script: true
