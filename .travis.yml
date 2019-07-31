@@ -66,3 +66,22 @@ jobs:
       script:
         - *base_script
         - travis_wait 60 valgrind -- SvtAv1EncApp --preset 4 -i akiyo_cif.y4m -n 20 -b test1.ivf
+    - name: Docker
+      language: shell
+      services:
+        - docker
+      addons:
+        homebrew:
+          update: true
+      before_install: true
+      install:
+        - for url in raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master randomderp.com; do curl -LO https://$url/video.tar.gz && break; done
+        - tar xf video.tar.gz
+      script:
+        - echo "$DOCKER_PASSWORD" | docker login -u 1480c1 --password-stdin
+        - docker pull 1480c1/svt-av1:latest || true
+        - docker build --compress -t 1480c1/svt-av1:latest .
+        - docker run -i 1480c1/svt-av1 -i stdin -b stdout < akiyo_cif.y4m  > test.ivf
+      deploy:
+        provider: script
+        script: docker push 1480c1/svt-av1:latest
