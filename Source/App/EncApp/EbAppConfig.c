@@ -594,7 +594,7 @@ static void set_profile(const char *value, EbConfig *cfg) {
 }
 static void set_tier(const char *value, EbConfig *cfg) { cfg->tier = strtol(value, NULL, 0); }
 static void set_level(const char *value, EbConfig *cfg) {
-    if (strtoul(value, NULL, 0) != 0 || EB_STRCMP(value, "0") == 0)
+    if (strtoul(value, NULL, 0)|| !strcmp(value, "0"))
         cfg->level = (uint32_t)(10 * strtod(value, NULL));
     else
         cfg->level = 9999999;
@@ -649,7 +649,7 @@ static void set_asm_type(const char *value, EbConfig *cfg) {
     uint32_t       i;
 
     for (i = 0; i < para_map_size; ++i) {
-        if (EB_STRCMP(value, param_maps[i].name) == 0) {
+        if (strcmp(value, param_maps[i].name) == 0) {
             cfg->cpu_flags_limit = param_maps[i].flags;
             return;
         }
@@ -1764,7 +1764,7 @@ static void set_config_value(EbConfig *config, const char *name, const char *val
     int32_t i = 0;
 
     while (config_entry[i].name != NULL) {
-        if (EB_STRCMP(config_entry[i].name, name) == 0)
+        if (strcmp(config_entry[i].name, name) == 0)
             (*config_entry[i].scf)((const char *)value, config);
         ++i;
     }
@@ -1849,7 +1849,7 @@ static int32_t find_token(int32_t argc, char *const argv[], char const *token, c
     int32_t return_error = -1;
 
     while ((argc > 0) && (return_error != 0)) {
-        return_error = EB_STRCMP(argv[--argc], token);
+        return_error = strcmp(argv[--argc], token);
         if (return_error == 0) { EB_STRCPY(configStr, COMMAND_LINE_MAX_SIZE, argv[argc + 1]); }
     }
 
@@ -1988,14 +1988,14 @@ int32_t find_token_multiple_inputs(int32_t argc, char *const argv[], const char 
     int32_t return_error = -1;
     int32_t done         = 0;
     while ((argc > 0) && (return_error != 0)) {
-        return_error = EB_STRCMP(argv[--argc], token);
+        return_error = strcmp(argv[--argc], token);
         if (return_error == 0) {
             int32_t count;
             for (count = 0; count < MAX_CHANNEL_NUMBER; ++count) {
                 if (done == 0) {
                     if (argv[argc + count + 1]) {
                         if (strtoul(argv[argc + count + 1], NULL, 0) != 0 ||
-                            EB_STRCMP(argv[argc + count + 1], "0") == 0) {
+                            strcmp(argv[argc + count + 1], "0") == 0) {
                             EB_STRCPY(
                                 configStr[count], COMMAND_LINE_MAX_SIZE, argv[argc + count + 1]);
                         } else if (argv[argc + count + 1][0] != '-') {
@@ -2021,7 +2021,7 @@ int32_t find_token_multiple_inputs(int32_t argc, char *const argv[], const char 
 
 uint32_t check_long(ConfigEntry config_entry, ConfigEntry config_entry_next) {
     if (config_entry_next.name == NULL) { return 0; }
-    if (EB_STRCMP(config_entry.name, config_entry_next.name) == 0) { return 1; }
+    if (strcmp(config_entry.name, config_entry_next.name) == 0) { return 1; }
     return 0;
 }
 
@@ -2235,7 +2235,7 @@ uint32_t get_number_of_channels(int32_t argc, char *const argv[]) {
 void mark_token_as_read(const char *token, char *cmd_copy[], int32_t *cmd_token_cnt) {
     int32_t cmd_copy_index;
     for (cmd_copy_index = 0; cmd_copy_index < *(cmd_token_cnt); ++cmd_copy_index) {
-        if (!EB_STRCMP(cmd_copy[cmd_copy_index], token))
+        if (!strcmp(cmd_copy[cmd_copy_index], token))
             cmd_copy[cmd_copy_index] = cmd_copy[--(*cmd_token_cnt)];
     }
 }
@@ -2327,7 +2327,7 @@ static int32_t parse_pred_struct_file(EbConfig *config, char *buffer, int32_t si
                 EB_STRNCPY(var_name, CONFIG_FILE_MAX_VAR_LEN, argv[0], arg_len[0]);
                 // Null terminate the variable name
                 var_name[arg_len[0]] = CONFIG_FILE_NULL_CHAR;
-                if (EB_STRCMP(var_name, "PredStructEntry")) { continue; }
+                if (strcmp(var_name, "PredStructEntry")) { continue; }
 
                 ++entry_num;
                 idx_ref_list0 = idx_ref_list1 = num_ref_list0 = num_ref_list1 = 0;
@@ -2459,46 +2459,46 @@ EbErrorType handle_short_tokens(char *string) {
 const char *handle_warnings(const char *token, char *print_message, uint8_t double_dash_token) {
     const char *linked_token = "";
 
-    if (EB_STRCMP(token, ENCMODE_TOKEN) == 0) linked_token = PRESET_TOKEN;
-    if (EB_STRCMP(token, ENCODER_BIT_DEPTH) == 0) linked_token = INPUT_DEPTH_TOKEN;
-    if (EB_STRCMP(token, INTRA_PERIOD_TOKEN) == 0) linked_token = KEYINT_TOKEN;
-    if (EB_STRCMP(token, QP_FILE_TOKEN) == 0) linked_token = QP_FILE_NEW_TOKEN;
-    if (EB_STRCMP(token, LOOK_AHEAD_DIST_TOKEN) == 0) linked_token = LOOKAHEAD_NEW_TOKEN;
+    if (strcmp(token, ENCMODE_TOKEN) == 0) linked_token = PRESET_TOKEN;
+    if (strcmp(token, ENCODER_BIT_DEPTH) == 0) linked_token = INPUT_DEPTH_TOKEN;
+    if (strcmp(token, INTRA_PERIOD_TOKEN) == 0) linked_token = KEYINT_TOKEN;
+    if (strcmp(token, QP_FILE_TOKEN) == 0) linked_token = QP_FILE_NEW_TOKEN;
+    if (strcmp(token, LOOK_AHEAD_DIST_TOKEN) == 0) linked_token = LOOKAHEAD_NEW_TOKEN;
 
-    if (EB_STRCMP(token, STAT_REPORT_TOKEN) == 0) linked_token = STAT_REPORT_NEW_TOKEN;
-    if (EB_STRCMP(token, RESTORATION_ENABLE_TOKEN) == 0)
+    if (strcmp(token, STAT_REPORT_TOKEN) == 0) linked_token = STAT_REPORT_NEW_TOKEN;
+    if (strcmp(token, RESTORATION_ENABLE_TOKEN) == 0)
         linked_token = RESTORATION_ENABLE_NEW_TOKEN;
-    if (EB_STRCMP(token, EDGE_SKIP_ANGLE_INTRA_TOKEN) == 0)
+    if (strcmp(token, EDGE_SKIP_ANGLE_INTRA_TOKEN) == 0)
         linked_token = EDGE_SKIP_ANGLE_INTRA_NEW_TOKEN;
-    if (EB_STRCMP(token, INTER_INTRA_COMPOUND_TOKEN) == 0)
+    if (strcmp(token, INTER_INTRA_COMPOUND_TOKEN) == 0)
         linked_token = INTER_INTRA_COMPOUND_NEW_TOKEN;
-    if (EB_STRCMP(token, MFMV_ENABLE_TOKEN) == 0) linked_token = MFMV_ENABLE_NEW_TOKEN;
-    if (EB_STRCMP(token, REDUNDANT_BLK_TOKEN) == 0) linked_token = REDUNDANT_BLK_NEW_TOKEN;
-    if (EB_STRCMP(token, SPATIAL_SSE_FL_TOKEN) == 0) linked_token = SPATIAL_SSE_FL_NEW_TOKEN;
-    if (EB_STRCMP(token, OVR_BNDRY_BLK_TOKEN) == 0) linked_token = OVR_BNDRY_BLK_NEW_TOKEN;
-    if (EB_STRCMP(token, NEW_NEAREST_COMB_INJECT_TOKEN) == 0)
+    if (strcmp(token, MFMV_ENABLE_TOKEN) == 0) linked_token = MFMV_ENABLE_NEW_TOKEN;
+    if (strcmp(token, REDUNDANT_BLK_TOKEN) == 0) linked_token = REDUNDANT_BLK_NEW_TOKEN;
+    if (strcmp(token, SPATIAL_SSE_FL_TOKEN) == 0) linked_token = SPATIAL_SSE_FL_NEW_TOKEN;
+    if (strcmp(token, OVR_BNDRY_BLK_TOKEN) == 0) linked_token = OVR_BNDRY_BLK_NEW_TOKEN;
+    if (strcmp(token, NEW_NEAREST_COMB_INJECT_TOKEN) == 0)
         linked_token = NEW_NEAREST_COMB_INJECT_NEW_TOKEN;
-    if (EB_STRCMP(token, PRUNE_UNIPRED_ME_TOKEN) == 0) linked_token = PRUNE_UNIPRED_ME_NEW_TOKEN;
-    if (EB_STRCMP(token, PRUNE_REF_REC_PART_TOKEN) == 0)
+    if (strcmp(token, PRUNE_UNIPRED_ME_TOKEN) == 0) linked_token = PRUNE_UNIPRED_ME_NEW_TOKEN;
+    if (strcmp(token, PRUNE_REF_REC_PART_TOKEN) == 0)
         linked_token = PRUNE_REF_REC_PART_NEW_TOKEN;
-    if (EB_STRCMP(token, NSQ_TABLE_TOKEN) == 0) linked_token = NSQ_TABLE_NEW_TOKEN;
-    if (EB_STRCMP(token, FRAME_END_CDF_UPDATE_TOKEN) == 0)
+    if (strcmp(token, NSQ_TABLE_TOKEN) == 0) linked_token = NSQ_TABLE_NEW_TOKEN;
+    if (strcmp(token, FRAME_END_CDF_UPDATE_TOKEN) == 0)
         linked_token = FRAME_END_CDF_UPDATE_NEW_TOKEN;
-    if (EB_STRCMP(token, LOCAL_WARPED_ENABLE_TOKEN) == 0)
+    if (strcmp(token, LOCAL_WARPED_ENABLE_TOKEN) == 0)
         linked_token = LOCAL_WARPED_ENABLE_NEW_TOKEN;
-    if (EB_STRCMP(token, GLOBAL_MOTION_ENABLE_TOKEN) == 0)
+    if (strcmp(token, GLOBAL_MOTION_ENABLE_TOKEN) == 0)
         linked_token = GLOBAL_MOTION_ENABLE_NEW_TOKEN;
-    if (EB_STRCMP(token, RDOQ_TOKEN) == 0) linked_token = RDOQ_NEW_TOKEN;
-    if (EB_STRCMP(token, FILTER_INTRA_TOKEN) == 0) linked_token = FILTER_INTRA_NEW_TOKEN;
-    if (EB_STRCMP(token, HDR_INPUT_TOKEN) == 0) linked_token = HDR_INPUT_NEW_TOKEN;
-    if (EB_STRCMP(token, ADAPTIVE_QP_ENABLE_TOKEN) == 0)
+    if (strcmp(token, RDOQ_TOKEN) == 0) linked_token = RDOQ_NEW_TOKEN;
+    if (strcmp(token, FILTER_INTRA_TOKEN) == 0) linked_token = FILTER_INTRA_NEW_TOKEN;
+    if (strcmp(token, HDR_INPUT_TOKEN) == 0) linked_token = HDR_INPUT_NEW_TOKEN;
+    if (strcmp(token, ADAPTIVE_QP_ENABLE_TOKEN) == 0)
         linked_token = ADAPTIVE_QP_ENABLE_NEW_TOKEN;
 
-    if (EB_STRCMP(token, DISABLE_CFL_TOKEN) == 0) linked_token = DISABLE_CFL_NEW_TOKEN;
-    if (EB_STRCMP(token, INTRA_EDGE_FILTER_TOKEN) == 0) linked_token = INTRA_EDGE_FILTER_NEW_TOKEN;
-    if (EB_STRCMP(token, INTRA_ANGLE_DELTA_TOKEN) == 0) linked_token = INTRA_ANGLE_DELTA_NEW_TOKEN;
-    if (EB_STRCMP(token, PAETH_TOKEN) == 0) linked_token = PAETH_NEW_TOKEN;
-    if (EB_STRCMP(token, SMOOTH_TOKEN) == 0) linked_token = SMOOTH_NEW_TOKEN;
+    if (strcmp(token, DISABLE_CFL_TOKEN) == 0) linked_token = DISABLE_CFL_NEW_TOKEN;
+    if (strcmp(token, INTRA_EDGE_FILTER_TOKEN) == 0) linked_token = INTRA_EDGE_FILTER_NEW_TOKEN;
+    if (strcmp(token, INTRA_ANGLE_DELTA_TOKEN) == 0) linked_token = INTRA_ANGLE_DELTA_NEW_TOKEN;
+    if (strcmp(token, PAETH_TOKEN) == 0) linked_token = PAETH_NEW_TOKEN;
+    if (strcmp(token, SMOOTH_TOKEN) == 0) linked_token = SMOOTH_NEW_TOKEN;
 
     if (EB_STRLEN(linked_token, WARNING_LENGTH) > 1) {
         const char *message_str = " will be deprecated soon, please use ";
@@ -2602,7 +2602,7 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
 
                 // Fill up the values corresponding to each channel
                 for (index = 0; index < num_channels; ++index) {
-                    if (EB_STRCMP(config_strings[index], " "))
+                    if (strcmp(config_strings[index], " "))
                         (*config_entry[token_index].scf)(config_strings[index], configs[index]);
                     else
                         break;
@@ -2624,7 +2624,7 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
 
                 // Fill up the values corresponding to each channel
                 for (index = 0; index < num_channels; ++index) {
-                    if (EB_STRCMP(config_strings[index], " "))
+                    if (strcmp(config_strings[index], " "))
                         (*config_entry[token_index].scf)(config_strings[index], configs[index]);
                     else
                         break;
@@ -2676,7 +2676,7 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
             for (input_index = last_index;
                  input_index < configs[index]->number_hme_search_region_in_width + last_index;
                  ++input_index) {
-                if (EB_STRCMP(config_strings[input_index], " "))
+                if (strcmp(config_strings[input_index], " "))
                     set_hme_level_0_search_area_in_width_array(config_strings[input_index],
                                                                configs[index]);
                 else {
@@ -2702,7 +2702,7 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
             for (input_index = last_index;
                  input_index < configs[index]->number_hme_search_region_in_height + last_index;
                  ++input_index) {
-                if (EB_STRCMP(config_strings[input_index], " "))
+                if (strcmp(config_strings[input_index], " "))
                     set_hme_level_0_search_area_in_height_array(config_strings[input_index],
                                                                 configs[index]);
                 else {
@@ -2728,7 +2728,7 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
             for (input_index = last_index;
                  input_index < configs[index]->number_hme_search_region_in_height + last_index;
                  ++input_index) {
-                if (EB_STRCMP(config_strings[input_index], " "))
+                if (strcmp(config_strings[input_index], " "))
                     set_hme_level_1_search_area_in_height_array(config_strings[input_index],
                                                                 configs[index]);
                 else {
@@ -2754,7 +2754,7 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
             for (input_index = last_index;
                  input_index < configs[index]->number_hme_search_region_in_width + last_index;
                  ++input_index) {
-                if (EB_STRCMP(config_strings[input_index], " "))
+                if (strcmp(config_strings[input_index], " "))
                     set_hme_level_1_search_area_in_width_array(config_strings[input_index],
                                                                configs[index]);
                 else {
@@ -2780,7 +2780,7 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
             for (input_index = last_index;
                  input_index < configs[index]->number_hme_search_region_in_width + last_index;
                  ++input_index) {
-                if (EB_STRCMP(config_strings[input_index], " "))
+                if (strcmp(config_strings[input_index], " "))
                     set_hme_level_2_search_area_in_width_array(config_strings[input_index],
                                                                configs[index]);
                 else {
@@ -2806,7 +2806,7 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
             for (input_index = last_index;
                  input_index < configs[index]->number_hme_search_region_in_height + last_index;
                  ++input_index) {
-                if (EB_STRCMP(config_strings[input_index], " "))
+                if (strcmp(config_strings[input_index], " "))
                     set_hme_level_2_search_area_in_height_array(config_strings[input_index],
                                                                 configs[index]);
                 else {
