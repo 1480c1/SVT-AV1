@@ -1630,8 +1630,6 @@ void eb_config_ctor(EbConfig *config_ptr) {
     config_ptr->md_stage_1_class_prune_th   = 100;
     config_ptr->md_stage_2_3_cand_prune_th  = 15;
     config_ptr->md_stage_2_3_class_prune_th = 25;
-
-    return;
 }
 
 /**********************************
@@ -1691,7 +1689,6 @@ void eb_config_dtor(EbConfig *config_ptr) {
         fclose(config_ptr->output_stat_file);
         config_ptr->output_stat_file = (FILE *)NULL;
     }
-    return;
 }
 
 /**********************************
@@ -1739,8 +1736,6 @@ static void line_split(uint32_t *argc, char *argv[CONFIG_FILE_MAX_ARG_COUNT],
             i = 0;
         }
     }
-
-    return;
 }
 
 /**********************************
