@@ -1756,44 +1756,37 @@ static void parse_config_file(EbConfig *config, char *buffer, int32_t size) {
     char var_name[CONFIG_FILE_MAX_VAR_LEN];
     char var_value[CONFIG_FILE_MAX_ARG_COUNT][CONFIG_FILE_MAX_VAR_LEN];
 
-    uint32_t value_index;
-
     uint32_t comment_section_flag = 0;
     uint32_t new_line_flag        = 0;
 
     // Keep looping until we process the entire file
     while (size--) {
-        comment_section_flag =
-            ((*buffer == CONFIG_FILE_COMMENT_CHAR) || (comment_section_flag != 0))
-                ? 1
-                : comment_section_flag;
+        if (*buffer == CONFIG_FILE_COMMENT_CHAR || comment_section_flag)
+            comment_section_flag = 1;
 
         // At the beginning of each line
-        if ((new_line_flag == 1) && (comment_section_flag == 0)) {
+        if (new_line_flag == 1 && !comment_section_flag) {
             // Do an argc/argv split for the line
             line_split(&argc, argv, arg_len, buffer);
 
-            if ((argc > 2) && (*argv[1] == CONFIG_FILE_VALUE_SPLIT)) {
+            if (argc > 2 && *argv[1] == CONFIG_FILE_VALUE_SPLIT) {
                 // ***NOTE - We're assuming that the variable name is the first arg and
                 // the variable value is the third arg.
 
                 // Cap the length of the variable name
-                arg_len[0] = (arg_len[0] > CONFIG_FILE_MAX_VAR_LEN - 1)
-                                 ? CONFIG_FILE_MAX_VAR_LEN - 1
-                                 : arg_len[0];
+                if (arg_len[0] > CONFIG_FILE_MAX_VAR_LEN - 1)
+                    arg_len[0] = CONFIG_FILE_MAX_VAR_LEN - 1;
                 // Copy the variable name
                 EB_STRNCPY(var_name, CONFIG_FILE_MAX_VAR_LEN, argv[0], arg_len[0]);
                 // Null terminate the variable name
                 var_name[arg_len[0]] = CONFIG_FILE_NULL_CHAR;
 
-                for (value_index = 0;
-                     (value_index < CONFIG_FILE_MAX_ARG_COUNT - 2) && (value_index < (argc - 2));
+                for (uint32_t value_index = 0;
+                     value_index < (CONFIG_FILE_MAX_ARG_COUNT - 2) && value_index < (argc - 2);
                      ++value_index) {
                     // Cap the length of the variable
-                    arg_len[value_index + 2] =
-                        (arg_len[value_index + 2] > CONFIG_FILE_MAX_VAR_LEN - 1)
-                            ? CONFIG_FILE_MAX_VAR_LEN - 1
-                            : arg_len[value_index + 2];
+                    if (arg_len[value_index + 2] > CONFIG_FILE_MAX_VAR_LEN - 1)
+                        arg_len[value_index + 2] = CONFIG_FILE_MAX_VAR_LEN - 1;
                     // Copy the variable name
                     EB_STRNCPY(var_value[value_index],
                                CONFIG_FILE_MAX_VAR_LEN,
@@ -1807,12 +1800,11 @@ static void parse_config_file(EbConfig *config, char *buffer, int32_t size) {
             }
         }
 
-        comment_section_flag = (*buffer == CONFIG_FILE_NEWLINE_CHAR) ? 0 : comment_section_flag;
-        new_line_flag        = (*buffer == CONFIG_FILE_NEWLINE_CHAR) ? 1 : 0;
+        new_line_flag = *buffer == CONFIG_FILE_NEWLINE_CHAR;
+        if (new_line_flag)
+            comment_section_flag = 0;
         ++buffer;
     }
-
-    return;
 }
 
 /******************************************
