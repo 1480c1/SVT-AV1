@@ -241,14 +241,14 @@ static void set_cfg_input_file(const char *filename, EbConfig *cfg) {
     if (handle == INVALID_HANDLE_VALUE) return;
     cfg->input_file_is_fifo = GetFileType(handle) == FILE_TYPE_PIPE;
 #else
-    int         fd = fileno(cfg->input_file);
+    int fd = fileno(cfg->input_file);
     struct stat statbuf;
     fstat(fd, &statbuf);
     cfg->input_file_is_fifo = S_ISFIFO(statbuf.st_mode);
 #endif
 
     cfg->y4m_input = check_if_y4m(cfg);
-};
+}
 
 static void set_pred_struct_file(const char *value, EbConfig *cfg) {
 
@@ -257,7 +257,7 @@ static void set_pred_struct_file(const char *value, EbConfig *cfg) {
     EB_STRCPY(cfg->input_pred_struct_filename, strlen(value) + 1, value);
 
     cfg->enable_manual_pred_struct = EB_TRUE;
-};
+}
 
 static void set_cfg_stream_file(const char *value, EbConfig *cfg) {
     if (cfg->bitstream_file && cfg->bitstream_file != stdout) { fclose(cfg->bitstream_file); }
@@ -267,49 +267,49 @@ static void set_cfg_stream_file(const char *value, EbConfig *cfg) {
     } else {
         FOPEN(cfg->bitstream_file, value, "wb");
     }
-};
+}
 static void set_cfg_error_file(const char *value, EbConfig *cfg) {
     if (cfg->error_log_file && cfg->error_log_file != stderr) { fclose(cfg->error_log_file); }
     FOPEN(cfg->error_log_file, value, "w+");
-};
+}
 static void set_cfg_recon_file(const char *value, EbConfig *cfg) {
     if (cfg->recon_file) { fclose(cfg->recon_file); }
     FOPEN(cfg->recon_file, value, "wb");
-};
+}
 static void set_cfg_qp_file(const char *value, EbConfig *cfg) {
     if (cfg->qp_file) { fclose(cfg->qp_file); }
     FOPEN(cfg->qp_file, value, "r");
-};
+}
 static void set_input_stat_file(const char *value, EbConfig *cfg) {
     if (cfg->input_stat_file) { fclose(cfg->input_stat_file); }
     FOPEN(cfg->input_stat_file, value, "rb");
-};
+}
 static void set_output_stat_file(const char *value, EbConfig *cfg) {
     if (cfg->output_stat_file) { fclose(cfg->output_stat_file); }
     FOPEN(cfg->output_stat_file, value, "wb");
-};
+}
 static void set_snd_pass_enc_mode(const char *value, EbConfig *cfg) {
     cfg->snd_pass_enc_mode = (uint8_t)strtoul(value, NULL, 0);
-};
+}
 static void set_cfg_stat_file(const char *value, EbConfig *cfg) {
     if (cfg->stat_file) { fclose(cfg->stat_file); }
     FOPEN(cfg->stat_file, value, "wb");
-};
+}
 static void set_stat_report(const char *value, EbConfig *cfg) {
     cfg->stat_report = (uint8_t)strtoul(value, NULL, 0);
-};
+}
 static void set_cfg_source_width(const char *value, EbConfig *cfg) {
     cfg->source_width = strtoul(value, NULL, 0);
-};
+}
 static void set_cfg_source_height(const char *value, EbConfig *cfg) {
     cfg->source_height = strtoul(value, NULL, 0);
-};
+}
 static void set_cfg_frames_to_be_encoded(const char *value, EbConfig *cfg) {
     cfg->frames_to_be_encoded = strtol(value, NULL, 0);
-};
+}
 static void set_buffered_input(const char *value, EbConfig *cfg) {
     cfg->buffered_input = strtol(value, NULL, 0);
-};
+}
 static void set_no_progress(const char*value, EbConfig *cfg) {
     cfg->no_progress = (EbBool)strtoul(value, NULL, 0);
 }
@@ -323,10 +323,10 @@ static void set_frame_rate(const char *value, EbConfig *cfg) {
 
 static void set_frame_rate_numerator(const char *value, EbConfig *cfg) {
     cfg->frame_rate_numerator = strtoul(value, NULL, 0);
-};
+}
 static void set_frame_rate_denominator(const char *value, EbConfig *cfg) {
     cfg->frame_rate_denominator = strtoul(value, NULL, 0);
-};
+}
 static void set_encoder_bit_depth(const char *value, EbConfig *cfg) {
     cfg->encoder_bit_depth = strtoul(value, NULL, 0);
 }
@@ -341,274 +341,274 @@ static void set_compressed_ten_bit_format(const char *value, EbConfig *cfg) {
 }
 static void set_enc_mode(const char *value, EbConfig *cfg) {
     cfg->enc_mode = (uint8_t)strtoul(value, NULL, 0);
-};
+}
 static void set_cfg_intra_period(const char *value, EbConfig *cfg) {
     cfg->intra_period = strtol(value, NULL, 0);
-};
+}
 static void set_cfg_intra_refresh_type(const char *value, EbConfig *cfg) {
     cfg->intra_refresh_type = strtol(value, NULL, 0);
-};
+}
 static void set_hierarchical_levels(const char *value, EbConfig *cfg) {
     cfg->hierarchical_levels = strtol(value, NULL, 0);
-};
+}
 static void set_cfg_pred_structure(const char *value, EbConfig *cfg) {
     cfg->pred_structure = strtol(value, NULL, 0);
-};
-static void set_cfg_qp(const char *value, EbConfig *cfg) { cfg->qp = strtoul(value, NULL, 0); };
+}
+static void set_cfg_qp(const char *value, EbConfig *cfg) { cfg->qp = strtoul(value, NULL, 0); }
 static void set_cfg_use_qp_file(const char *value, EbConfig *cfg) {
     cfg->use_qp_file = (EbBool)strtol(value, NULL, 0);
-};
+}
 static void set_cfg_film_grain(const char *value, EbConfig *cfg) {
     cfg->film_grain_denoise_strength = strtol(value, NULL, 0);
-}; //not bool to enable possible algorithm extension in the future
+} //not bool to enable possible algorithm extension in the future
 static void set_disable_dlf_flag(const char *value, EbConfig *cfg) {
     cfg->disable_dlf_flag = (EbBool)strtoul(value, NULL, 0);
-};
+}
 static void set_enable_local_warped_motion_flag(const char *value, EbConfig *cfg) {
     cfg->enable_warped_motion = strtol(value, NULL, 0);
-};
+}
 static void set_enable_global_motion_flag(const char *value, EbConfig *cfg) {
     cfg->enable_global_motion = (EbBool)strtoul(value, NULL, 0);
-};
+}
 static void set_cdef_mode(const char *value, EbConfig *cfg) {
     cfg->cdef_mode = strtol(value, NULL, 0);
-};
+}
 static void set_enable_restoration_filter_flag(const char *value, EbConfig *cfg) {
     cfg->enable_restoration_filtering = strtol(value, NULL, 0);
-};
+}
 static void set_sg_filter_mode(const char *value, EbConfig *cfg) {
     cfg->sg_filter_mode = strtol(value, NULL, 0);
-};
+}
 static void set_wn_filter_mode(const char *value, EbConfig *cfg) {
     cfg->wn_filter_mode = strtol(value, NULL, 0);
-};
+}
 static void set_class_12_flag(const char *value, EbConfig *cfg) {
     cfg->combine_class_12 = strtol(value, NULL, 0);
-};
+}
 static void set_edge_skip_angle_intra_flag(const char *value, EbConfig *cfg) {
     cfg->edge_skp_angle_intra = strtol(value, NULL, 0);
-};
+}
 static void set_intra_angle_delta_flag(const char *value, EbConfig *cfg) {
     cfg->intra_angle_delta = strtol(value, NULL, 0);
-};
+}
 static void set_interintra_compound_flag(const char *value, EbConfig *cfg) {
     cfg->inter_intra_compound = strtol(value, NULL, 0);
-};
+}
 static void set_enable_paeth_flag(const char *value, EbConfig *cfg) {
     cfg->enable_paeth = strtol(value, NULL, 0);
-};
+}
 static void set_enable_smooth_flag(const char *value, EbConfig *cfg) {
     cfg->enable_smooth = strtol(value, NULL, 0);
-};
+}
 static void set_enable_mfmv_flag(const char *value, EbConfig *cfg) {
     cfg->enable_mfmv = strtol(value, NULL, 0);
-};
+}
 static void set_enable_redundant_blk_flag(const char *value, EbConfig *cfg) {
     cfg->enable_redundant_blk = strtol(value, NULL, 0);
-};
+}
 static void set_spatial_sse_fl_flag(const char *value, EbConfig *cfg) {
     cfg->spatial_sse_fl = strtol(value, NULL, 0);
-};
+}
 static void set_enable_sub_pel_flag(const char *value, EbConfig *cfg) {
     cfg->enable_subpel = strtol(value, NULL, 0);
-};
+}
 static void set_over_bndry_blk_flag(const char *value, EbConfig *cfg) {
     cfg->over_bndry_blk = strtol(value, NULL, 0);
-};
+}
 static void set_new_nearest_comb_inject_flag(const char *value, EbConfig *cfg) {
     cfg->new_nearest_comb_inject = strtol(value, NULL, 0);
-};
+}
 static void set_prune_unipred_me_flag(const char *value, EbConfig *cfg) {
     cfg->prune_unipred_me = strtol(value, NULL, 0);
-};
+}
 static void set_prune_ref_rec_part_flag(const char *value, EbConfig *cfg) {
     cfg->prune_ref_rec_part = strtol(value, NULL, 0);
-};
+}
 static void set_nsq_table_flag(const char *value, EbConfig *cfg) {
     cfg->nsq_table = strtol(value, NULL, 0);
-};
+}
 static void set_frame_end_cdf_update_flag(const char *value, EbConfig *cfg) {
     cfg->frame_end_cdf_update = strtol(value, NULL, 0);
-};
+}
 static void set_chroma_mode(const char *value, EbConfig *cfg) {
     cfg->set_chroma_mode = strtol(value, NULL, 0);
-};
+}
 static void set_disable_cfl_flag(const char *value, EbConfig *cfg) {
     cfg->disable_cfl_flag = strtol(value, NULL, 0);
-};
+}
 static void set_enable_obmc_flag(const char *value, EbConfig *cfg) {
     cfg->enable_obmc = (EbBool)strtoul(value, NULL, 0);
-};
+}
 static void set_enable_rdoq_flag(const char *value, EbConfig *cfg) {
     cfg->enable_rdoq = strtol(value, NULL, 0);
-};
+}
 static void set_predictive_me_flag(const char *value, EbConfig *cfg) {
     cfg->pred_me = strtol(value, NULL, 0);
-};
+}
 static void set_bipred3x3inject_flag(const char *value, EbConfig *cfg) {
     cfg->bipred_3x3_inject = strtol(value, NULL, 0);
-};
+}
 static void set_compound_level_flag(const char *value, EbConfig *cfg) {
     cfg->compound_level = strtol(value, NULL, 0);
-};
+}
 static void set_enable_filter_intra_flag(const char *value, EbConfig *cfg) {
     cfg->enable_filter_intra = (EbBool)strtoul(value, NULL, 0);
-};
+}
 static void set_enable_intra_edge_filter_flag(const char *value, EbConfig *cfg) {
     cfg->enable_intra_edge_filter = strtol(value, NULL, 0);
-};
+}
 static void set_pic_based_rate_est(const char *value, EbConfig *cfg) {
     cfg->pic_based_rate_est = strtol(value, NULL, 0);
-};
+}
 static void set_enable_hme_flag(const char *value, EbConfig *cfg) {
     cfg->enable_hme_flag = (EbBool)strtoul(value, NULL, 0);
-};
+}
 static void set_enable_hme_level_0_flag(const char *value, EbConfig *cfg) {
     cfg->enable_hme_level0_flag = (EbBool)strtoul(value, NULL, 0);
-};
+}
 static void set_tile_row(const char *value, EbConfig *cfg) {
     cfg->tile_rows = strtoul(value, NULL, 0);
-};
+}
 static void set_tile_col(const char *value, EbConfig *cfg) {
     cfg->tile_columns = strtoul(value, NULL, 0);
-};
+}
 static void set_scene_change_detection(const char *value, EbConfig *cfg) {
     cfg->scene_change_detection = strtoul(value, NULL, 0);
 }
 static void set_look_ahead_distance(const char *value, EbConfig *cfg) {
     cfg->look_ahead_distance = strtoul(value, NULL, 0);
-};
+}
 static void set_rate_control_mode(const char *value, EbConfig *cfg) {
     cfg->rate_control_mode = strtoul(value, NULL, 0);
-};
+}
 static void set_target_bit_rate(const char *value, EbConfig *cfg) {
     cfg->target_bit_rate = 1000 * strtoul(value, NULL, 0);
-};
+}
 static void set_vbv_buf_size(const char *value, EbConfig *cfg) {
     cfg->vbv_bufsize = 1000 * strtoul(value, NULL, 0);
-};
+}
 static void set_max_qp_allowed(const char *value, EbConfig *cfg) {
     cfg->max_qp_allowed = strtoul(value, NULL, 0);
-};
+}
 static void set_min_qp_allowed(const char *value, EbConfig *cfg) {
     cfg->min_qp_allowed = strtoul(value, NULL, 0);
-};
+}
 static void set_adaptive_quantization(const char *value, EbConfig *cfg) {
     cfg->enable_adaptive_quantization = (EbBool)strtol(value, NULL, 0);
-};
+}
 static void set_enable_hme_level_1_flag(const char *value, EbConfig *cfg) {
     cfg->enable_hme_level1_flag = (EbBool)strtoul(value, NULL, 0);
-};
+}
 static void set_enable_hme_level_2_flag(const char *value, EbConfig *cfg) {
     cfg->enable_hme_level2_flag = (EbBool)strtoul(value, NULL, 0);
-};
+}
 static void set_cfg_search_area_width(const char *value, EbConfig *cfg) {
     cfg->search_area_width = strtoul(value, NULL, 0);
-};
+}
 static void set_cfg_search_area_height(const char *value, EbConfig *cfg) {
     cfg->search_area_height = strtoul(value, NULL, 0);
-};
+}
 static void set_cfg_number_hme_search_region_in_width(const char *value, EbConfig *cfg) {
     cfg->number_hme_search_region_in_width = strtoul(value, NULL, 0);
-};
+}
 static void set_cfg_number_hme_search_region_in_height(const char *value, EbConfig *cfg) {
     cfg->number_hme_search_region_in_height = strtoul(value, NULL, 0);
-};
+}
 static void set_cfg_hme_level_0_total_search_area_width(const char *value, EbConfig *cfg) {
     cfg->hme_level0_total_search_area_width = strtoul(value, NULL, 0);
-};
+}
 static void set_cfg_hme_level_0_total_search_area_height(const char *value, EbConfig *cfg) {
     cfg->hme_level0_total_search_area_height = strtoul(value, NULL, 0);
-};
+}
 static void set_cfg_use_default_me_hme(const char *value, EbConfig *cfg) {
     cfg->use_default_me_hme = (EbBool)strtol(value, NULL, 0);
-};
+}
 static void set_enable_ext_block_flag(const char *value, EbConfig *cfg) {
     cfg->ext_block_flag = (EbBool)strtoul(value, NULL, 0);
-};
+}
 static void set_hme_level_0_search_area_in_width_array(const char *value, EbConfig *cfg) {
     cfg->hme_level0_search_area_in_width_array[cfg->hme_level0_column_index++] =
         strtoul(value, NULL, 0);
-};
+}
 static void set_hme_level_0_search_area_in_height_array(const char *value, EbConfig *cfg) {
     cfg->hme_level0_search_area_in_height_array[cfg->hme_level0_row_index++] =
         strtoul(value, NULL, 0);
-};
+}
 static void set_hme_level_1_search_area_in_width_array(const char *value, EbConfig *cfg) {
     cfg->hme_level1_search_area_in_width_array[cfg->hme_level1_column_index++] =
         strtoul(value, NULL, 0);
-};
+}
 static void set_hme_level_1_search_area_in_height_array(const char *value, EbConfig *cfg) {
     cfg->hme_level1_search_area_in_height_array[cfg->hme_level1_row_index++] =
         strtoul(value, NULL, 0);
-};
+}
 static void set_hme_level_2_search_area_in_width_array(const char *value, EbConfig *cfg) {
     cfg->hme_level2_search_area_in_width_array[cfg->hme_level2_column_index++] =
         strtoul(value, NULL, 0);
-};
+}
 static void set_hme_level_2_search_area_in_height_array(const char *value, EbConfig *cfg) {
     cfg->hme_level2_search_area_in_height_array[cfg->hme_level2_row_index++] =
         strtoul(value, NULL, 0);
-};
+}
 static void set_screen_content_mode(const char *value, EbConfig *cfg) {
     cfg->screen_content_mode = strtoul(value, NULL, 0);
-};
+}
 static void set_intrabc_mode(const char *value, EbConfig *cfg) {
     cfg->intrabc_mode = strtol(value, NULL, 0);
-};
+}
 // --- start: ALTREF_FILTERING_SUPPORT
 static void set_enable_altrefs(const char *value, EbConfig *cfg) {
     cfg->enable_altrefs = (EbBool)strtoul(value, NULL, 0);
-};
+}
 static void set_altref_strength(const char *value, EbConfig *cfg) {
     cfg->altref_strength = (uint8_t)strtoul(value, NULL, 0);
-};
+}
 static void set_altref_n_frames(const char *value, EbConfig *cfg) {
     cfg->altref_nframes = (uint8_t)strtoul(value, NULL, 0);
-};
+}
 static void set_enable_overlays(const char *value, EbConfig *cfg) {
     cfg->enable_overlays = (EbBool)strtoul(value, NULL, 0);
-};
+}
 // --- end: ALTREF_FILTERING_SUPPORT
 // --- start: SUPER-RESOLUTION SUPPORT
 static void set_superres_mode(const char *value, EbConfig *cfg) {
     cfg->superres_mode = (SUPERRES_MODE)strtoul(value, NULL, 0);
-};
+}
 static void set_superres_denom(const char *value, EbConfig *cfg) {
     cfg->superres_denom = (uint8_t)strtoul(value, NULL, 0);
-};
+}
 static void set_superres_kf_denom(const char *value, EbConfig *cfg) {
     cfg->superres_kf_denom = (uint8_t)strtoul(value, NULL, 0);
-};
+}
 static void set_superres_qthres(const char *value, EbConfig *cfg) {
     cfg->superres_qthres = (uint8_t)strtoul(value, NULL, 0);
-};
+}
 // --- end: SUPER-RESOLUTION SUPPORT
 static void set_enable_hbd_mode_decision(const char *value, EbConfig *cfg) {
     cfg->enable_hbd_mode_decision = (uint8_t)strtoul(value, NULL, 0);
-};
+}
 static void set_enable_palette(const char *value, EbConfig *cfg) {
     cfg->enable_palette = (int32_t)strtol(value, NULL, 0);
-};
+}
 static void set_high_dynamic_range_input(const char *value, EbConfig *cfg) {
     cfg->high_dynamic_range_input = strtol(value, NULL, 0);
-};
+}
 static void set_profile(const char *value, EbConfig *cfg) {
     cfg->profile = strtol(value, NULL, 0);
-};
-static void set_tier(const char *value, EbConfig *cfg) { cfg->tier = strtol(value, NULL, 0); };
+}
+static void set_tier(const char *value, EbConfig *cfg) { cfg->tier = strtol(value, NULL, 0); }
 static void set_level(const char *value, EbConfig *cfg) {
     if (strtoul(value, NULL, 0) != 0 || EB_STRCMP(value, "0") == 0)
         cfg->level = (uint32_t)(10 * strtod(value, NULL));
     else
         cfg->level = 9999999;
-};
+}
 static void set_injector(const char *value, EbConfig *cfg) {
     cfg->injector = strtol(value, NULL, 0);
-};
+}
 static void speed_control_flag(const char *value, EbConfig *cfg) {
     cfg->speed_control_flag = strtol(value, NULL, 0);
-};
+}
 static void set_injector_frame_rate(const char *value, EbConfig *cfg) {
     cfg->injector_frame_rate = strtoul(value, NULL, 0);
     if (cfg->injector_frame_rate > 1000)
@@ -618,7 +618,7 @@ static void set_injector_frame_rate(const char *value, EbConfig *cfg) {
 }
 static void set_latency_mode(const char *value, EbConfig *cfg) {
     cfg->latency_mode = (uint8_t)strtol(value, NULL, 0);
-};
+}
 static void set_asm_type(const char *value, EbConfig *cfg) {
     const struct {
         const char *name;
@@ -660,19 +660,19 @@ static void set_asm_type(const char *value, EbConfig *cfg) {
     }
 
     cfg->cpu_flags_limit = CPU_FLAGS_INVALID;
-};
+}
 static void set_logical_processors(const char *value, EbConfig *cfg) {
     cfg->logical_processors = (uint32_t)strtoul(value, NULL, 0);
-};
+}
 static void set_unpin_execution(const char *value, EbConfig *cfg) {
     cfg->unpin = (uint32_t)strtoul(value, NULL, 0);
-};
+}
 static void set_target_socket(const char *value, EbConfig *cfg) {
     cfg->target_socket = (int32_t)strtol(value, NULL, 0);
-};
+}
 static void set_unrestricted_motion_vector(const char *value, EbConfig *cfg) {
     cfg->unrestricted_motion_vector = (EbBool)strtol(value, NULL, 0);
-};
+}
 
 static void set_square_weight(const char *value, EbConfig *cfg) {
     cfg->sq_weight = (uint64_t)strtoul(value, NULL, 0);
@@ -731,7 +731,8 @@ ConfigEntry config_entry_options[] = {
     {SINGLE_INPUT, OUTPUT_RECON_LONG_TOKEN, "Recon filename", set_cfg_recon_file},
 
     {SINGLE_INPUT, STAT_FILE_TOKEN, "Stat filename", set_cfg_stat_file},
-    {SINGLE_INPUT, NULL, NULL, NULL}};
+    {SINGLE_INPUT, NULL, NULL, NULL}
+};
 
 ConfigEntry config_entry_global_options[] = {
     // Picture Dimensions
@@ -811,7 +812,8 @@ ConfigEntry config_entry_global_options[] = {
     "--unpin is overwritten to 0 when --ss is set to 0 or 1",
     set_target_socket},
     // Termination
-    {SINGLE_INPUT, NULL, NULL, NULL}};
+    {SINGLE_INPUT, NULL, NULL, NULL}
+};
 
 ConfigEntry config_entry_rc[] = {
     // Rate Control
@@ -838,7 +840,8 @@ ConfigEntry config_entry_rc[] = {
      set_adaptive_quantization},
     {SINGLE_INPUT, VBV_BUFSIZE_TOKEN, "VBV buffer size", set_vbv_buf_size},
     // Termination
-    {SINGLE_INPUT, NULL, NULL, NULL}};
+    {SINGLE_INPUT, NULL, NULL, NULL}
+};
 ConfigEntry config_entry_2p[] = {
     // 2 pass
     {SINGLE_INPUT, OUTPUT_STAT_FILE_TOKEN, "First pass stat file output", set_output_stat_file},
@@ -851,7 +854,8 @@ ConfigEntry config_entry_2p[] = {
      "Use Hme/Me settings of the second pass'encoder mode in the first pass",
      set_snd_pass_enc_mode},
     // Termination
-    {SINGLE_INPUT, NULL, NULL, NULL}};
+    {SINGLE_INPUT, NULL, NULL, NULL}
+};
 ConfigEntry config_entry_intra_refresh[] = {
     // File I/O
     //{SINGLE_INPUT,
@@ -867,7 +871,8 @@ ConfigEntry config_entry_intra_refresh[] = {
      "Intra refresh type (1: CRA (Open GOP)2: IDR (Closed GOP))",
      set_tile_row},
     // Termination
-    {SINGLE_INPUT, NULL, NULL, NULL}};
+    {SINGLE_INPUT, NULL, NULL, NULL}
+};
 ConfigEntry config_entry_specific[] = {
     // Prediction Structure
     //{SINGLE_INPUT, ENCMODE_TOKEN, "Encoder mode/Preset used[0-8]", set_enc_mode},
@@ -1214,7 +1219,8 @@ ConfigEntry config_entry_specific[] = {
     // set_nx4_4xn_parent_mv_inject_flag},
 
     // Termination
-    {SINGLE_INPUT, NULL, NULL, NULL}};
+    {SINGLE_INPUT, NULL, NULL, NULL}
+};
 
 ConfigEntry config_entry[] = {
     // File I/O
@@ -1526,7 +1532,8 @@ ConfigEntry config_entry[] = {
     {SINGLE_INPUT, SMOOTH_NEW_TOKEN, "Smooth New Token", set_enable_smooth_flag},
 
     // Termination
-    {SINGLE_INPUT, NULL, NULL, NULL}};
+    {SINGLE_INPUT, NULL, NULL, NULL}
+};
 
 /**********************************
  * Constructor
@@ -2184,7 +2191,7 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                         empty_string,
                         config_entry_specific[sp_token_index].token,
                         config_entry_specific[sp_token_index].name);
-            };
+            }
         }
         return 1;
     } else
