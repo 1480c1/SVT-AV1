@@ -313,10 +313,8 @@ static void set_no_progress(const char*value, EbConfig *cfg) {
 }
 static void set_frame_rate(const char *value, EbConfig *cfg) {
     cfg->frame_rate = strtoul(value, NULL, 0);
-    if (cfg->frame_rate > 1000)
-        cfg->frame_rate = cfg->frame_rate;
-    else
-        cfg->frame_rate = cfg->frame_rate << 16;
+    if (cfg->frame_rate <= 1000)
+        cfg->frame_rate <<= 16;
 }
 
 static void set_frame_rate_numerator(const char *value, EbConfig *cfg) {
