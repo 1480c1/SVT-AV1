@@ -616,37 +616,26 @@ static void set_latency_mode(const char *value, EbConfig *cfg) {
 static void set_asm_type(const char *value, EbConfig *cfg) {
     const struct {
         const char *name;
+        const char *number;
         CPU_FLAGS   flags;
     } param_maps[] = {
-        {"c", 0},
-        {"0", 0},
-        {"mmx", (CPU_FLAGS_MMX << 1) - 1},
-        {"1", (CPU_FLAGS_MMX << 1) - 1},
-        {"sse", (CPU_FLAGS_SSE << 1) - 1},
-        {"2", (CPU_FLAGS_SSE << 1) - 1},
-        {"sse2", (CPU_FLAGS_SSE2 << 1) - 1},
-        {"3", (CPU_FLAGS_SSE2 << 1) - 1},
-        {"sse3", (CPU_FLAGS_SSE3 << 1) - 1},
-        {"4", (CPU_FLAGS_SSE3 << 1) - 1},
-        {"ssse3", (CPU_FLAGS_SSSE3 << 1) - 1},
-        {"5", (CPU_FLAGS_SSSE3 << 1) - 1},
-        {"sse4_1", (CPU_FLAGS_SSE4_1 << 1) - 1},
-        {"6", (CPU_FLAGS_SSE4_1 << 1) - 1},
-        {"sse4_2", (CPU_FLAGS_SSE4_2 << 1) - 1},
-        {"7", (CPU_FLAGS_SSE4_2 << 1) - 1},
-        {"avx", (CPU_FLAGS_AVX << 1) - 1},
-        {"8", (CPU_FLAGS_AVX << 1) - 1},
-        {"avx2", (CPU_FLAGS_AVX2 << 1) - 1},
-        {"9", (CPU_FLAGS_AVX2 << 1) - 1},
-        {"avx512", (CPU_FLAGS_AVX512VL << 1) - 1},
-        {"10", (CPU_FLAGS_AVX512VL << 1) - 1},
-        {"max", CPU_FLAGS_ALL},
-        {"11", CPU_FLAGS_ALL},
+        {"c", "0", 0},
+        {"mmx", "1", (CPU_FLAGS_MMX << 1) - 1},
+        {"sse", "2", (CPU_FLAGS_SSE << 1) - 1},
+        {"sse2", "3", (CPU_FLAGS_SSE2 << 1) - 1},
+        {"sse3", "4", (CPU_FLAGS_SSE3 << 1) - 1},
+        {"ssse3", "5", (CPU_FLAGS_SSSE3 << 1) - 1},
+        {"sse4_1", "6", (CPU_FLAGS_SSE4_1 << 1) - 1},
+        {"sse4_2", "7", (CPU_FLAGS_SSE4_2 << 1) - 1},
+        {"avx", "8", (CPU_FLAGS_AVX << 1) - 1},
+        {"avx2", "9", (CPU_FLAGS_AVX2 << 1) - 1},
+        {"avx512", "10", (CPU_FLAGS_AVX512VL << 1) - 1},
+        {"max", "11", CPU_FLAGS_ALL},
     };
     const uint32_t para_map_size = sizeof(param_maps) / sizeof(param_maps[0]);
 
     for (uint32_t i = 0; i < para_map_size; ++i) {
-        if (strcmp(value, param_maps[i].name) == 0) {
+        if (!strcmp(value, param_maps[i].name) || !strcmp(value, param_maps[i].number)) {
             cfg->cpu_flags_limit = param_maps[i].flags;
             return;
         }
