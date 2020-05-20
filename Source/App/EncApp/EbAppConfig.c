@@ -607,10 +607,8 @@ static void speed_control_flag(const char *value, EbConfig *cfg) {
 }
 static void set_injector_frame_rate(const char *value, EbConfig *cfg) {
     cfg->injector_frame_rate = strtoul(value, NULL, 0);
-    if (cfg->injector_frame_rate > 1000)
-        cfg->injector_frame_rate = cfg->injector_frame_rate;
-    else
-        cfg->injector_frame_rate = cfg->injector_frame_rate << 16;
+    if (cfg->injector_frame_rate <= 1000)
+        cfg->injector_frame_rate <<= 16;
 }
 static void set_latency_mode(const char *value, EbConfig *cfg) {
     cfg->latency_mode = (uint8_t)strtol(value, NULL, 0);
