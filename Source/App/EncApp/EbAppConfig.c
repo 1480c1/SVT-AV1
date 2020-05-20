@@ -1984,9 +1984,9 @@ int32_t find_token_multiple_inputs(int32_t argc, char *const argv[], const char 
     return return_error;
 }
 
-uint32_t check_long(ConfigEntry config_entry, ConfigEntry config_entry_next) {
-    if (config_entry_next.name == NULL) { return 0; }
-    if (strcmp(config_entry.name, config_entry_next.name) == 0) { return 1; }
+static uint32_t check_long(const ConfigEntry *config_entry, const ConfigEntry *config_entry_next) {
+    if (!config_entry_next->name) return 0;
+    if (!strcmp(config_entry->name, config_entry_next->name)) return 1;
     return 0;
 }
 
@@ -2009,8 +2009,8 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         fprintf(stderr, "\n%-25s\n", "Options:");
         while (config_entry_options[++options_token_index].token != NULL) {
             uint32_t check = check_long(
-                config_entry_options[options_token_index],
-                config_entry_options
+                &config_entry_options[options_token_index],
+                &config_entry_options
                     [options_token_index +
                      1]); // this only works if short and long token are one after another
             if (check == 1) {
@@ -2036,8 +2036,8 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         fprintf(stderr, "\n%-25s\n", "Encoder Global Options:");
         while (config_entry_global_options[++global_options_token_index].token != NULL) {
             uint32_t check =
-                check_long(config_entry_global_options[global_options_token_index],
-                           config_entry_global_options[global_options_token_index + 1]);
+                check_long(&config_entry_global_options[global_options_token_index],
+                           &config_entry_global_options[global_options_token_index + 1]);
             if (check == 1) {
                 token_options_format = "\t%-5s\t%-25s\t%-25s\n";
                 fprintf(stderr,
@@ -2061,7 +2061,7 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         fprintf(stderr, "\n%-25s\n", "Rate Control Options:");
         while (config_entry_rc[++rc_token_index].token != NULL) {
             uint32_t check =
-                check_long(config_entry_rc[rc_token_index], config_entry_rc[rc_token_index + 1]);
+                check_long(&config_entry_rc[rc_token_index], &config_entry_rc[rc_token_index + 1]);
             if (check == 1) {
                 token_options_format = "\t%-5s\t%-25s\t%-25s\n";
                 fprintf(stderr,
@@ -2084,8 +2084,8 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         }
         fprintf(stderr, "\n%-25s\n", "Twopass Options:");
         while (config_entry_2p[++two_p_token_index].token != NULL) {
-            uint32_t check = check_long(config_entry_2p[two_p_token_index],
-                                        config_entry_2p[two_p_token_index + 1]);
+            uint32_t check = check_long(&config_entry_2p[two_p_token_index],
+                                        &config_entry_2p[two_p_token_index + 1]);
             if (check == 1) {
                 token_options_format = "\t%-5s\t%-25s\t%-25s\n";
                 fprintf(stderr,
@@ -2108,8 +2108,8 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         }
         fprintf(stderr, "\n%-25s\n", "Keyframe Placement Options:");
         while (config_entry_intra_refresh[++kf_token_index].token != NULL) {
-            uint32_t check = check_long(config_entry_intra_refresh[kf_token_index],
-                                        config_entry_intra_refresh[kf_token_index + 1]);
+            uint32_t check = check_long(&config_entry_intra_refresh[kf_token_index],
+                                        &config_entry_intra_refresh[kf_token_index + 1]);
             if (check == 1) {
                 token_options_format = "\t%-5s\t%-25s\t%-25s\n";
                 fprintf(stderr,
@@ -2132,8 +2132,8 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         }
         fprintf(stderr, "\n%-25s\n", "AV1 Specific Options:");
         while (config_entry_specific[++sp_token_index].token != NULL) {
-            uint32_t check = check_long(config_entry_specific[sp_token_index],
-                                        config_entry_specific[sp_token_index + 1]);
+            uint32_t check = check_long(&config_entry_specific[sp_token_index],
+                                        &config_entry_specific[sp_token_index + 1]);
             if (check == 1) {
                 token_options_format = "\t%-5s\t%-25s\t%-25s\n";
                 fprintf(stderr,
