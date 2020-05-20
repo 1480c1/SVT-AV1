@@ -1695,12 +1695,9 @@ void eb_config_dtor(EbConfig *config_ptr) {
  * File Size
  **********************************/
 static int32_t find_file_size(FILE *const pFile) {
-    int32_t file_size;
-
     fseek(pFile, 0, SEEK_END);
-    file_size = ftell(pFile);
+    int32_t file_size = ftell(pFile);
     rewind(pFile);
-
     return file_size;
 }
 
