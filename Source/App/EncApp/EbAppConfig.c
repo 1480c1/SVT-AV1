@@ -1739,15 +1739,10 @@ static void line_split(uint32_t *argc, char *argv[CONFIG_FILE_MAX_ARG_COUNT],
 * Set Config value
 **********************************/
 static void set_config_value(EbConfig *config, const char *name, const char *value) {
-    int32_t i = 0;
-
-    while (config_entry[i].name != NULL) {
-        if (strcmp(config_entry[i].name, name) == 0)
-            (*config_entry[i].scf)((const char *)value, config);
-        ++i;
+    for (uint32_t i = 0; config_entry[i].name; ++i) {
+        if (!strcmp(config_entry[i].name, name))
+            (*config_entry[i].scf)(value, config);
     }
-
-    return;
 }
 
 /**********************************
