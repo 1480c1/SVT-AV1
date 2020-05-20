@@ -644,9 +644,8 @@ static void set_asm_type(const char *value, EbConfig *cfg) {
         {"11", CPU_FLAGS_ALL},
     };
     const uint32_t para_map_size = sizeof(param_maps) / sizeof(param_maps[0]);
-    uint32_t       i;
 
-    for (i = 0; i < para_map_size; ++i) {
+    for (uint32_t i = 0; i < para_map_size; ++i) {
         if (strcmp(value, param_maps[i].name) == 0) {
             cfg->cpu_flags_limit = param_maps[i].flags;
             return;
