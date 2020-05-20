@@ -2205,13 +2205,11 @@ void mark_token_as_read(const char *token, char *cmd_copy[], int32_t *cmd_token_
     }
 }
 
-EbBool is_negative_number(const char *string) {
-    int32_t length = (int32_t)strlen(string);
-    int32_t index  = 0;
+static EbBool is_negative_number(const char *string) {
     if (string[0] != '-') return EB_FALSE;
-    for (index = 1; index < length; index++) {
-        if (string[index] < '0' || string[index] > '9') return EB_FALSE;
-    }
+    for (const char *index = string + 1; *index; ++index)
+        if (*index < '0' || *index > '9')
+            return EB_FALSE;
     return EB_TRUE;
 }
 
