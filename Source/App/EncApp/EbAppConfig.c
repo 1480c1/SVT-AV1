@@ -1525,8 +1525,8 @@ void eb_config_ctor(EbConfig *config_ptr) {
     config_ptr->error_log_file         = stderr;
     config_ptr->frame_rate             = 30 << 16;
     config_ptr->encoder_bit_depth      = 8;
-    config_ptr->is_16bit_pipeline = 0;
-    config_ptr->encoder_color_format   = 1; //EB_YUV420
+    config_ptr->is_16bit_pipeline      = 0;
+    config_ptr->encoder_color_format   = EB_YUV420;
     config_ptr->buffered_input         = -1;
 
     config_ptr->qp                  = 50;
