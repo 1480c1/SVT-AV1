@@ -1843,11 +1843,11 @@ static int32_t read_config_file(EbConfig *config, char *config_path, uint32_t in
                 parse_config_file(config, config_file_buffer, config_file_size);
             } else {
                 fprintf(stderr, "Error channel %u: File Read Failed\n", instance_idx + 1);
-                return_error = -1;
+                return_error = EB_ErrorUndefined;
             }
         } else {
             fprintf(stderr, "Error channel %u: Memory Allocation Failed\n", instance_idx + 1);
-            return_error = -1;
+            return_error = EB_ErrorUndefined;
         }
 
         free(config_file_buffer);
@@ -1858,7 +1858,7 @@ static int32_t read_config_file(EbConfig *config, char *config_path, uint32_t in
                 "Error channel %u: Couldn't open Config File: %s\n",
                 instance_idx + 1,
                 config_path);
-        return_error = -1;
+        return_error = EB_ErrorUndefined;
     }
 
     return return_error;
@@ -2386,11 +2386,11 @@ static int32_t read_pred_struct_file(EbConfig *config, char *PredStructPath,
                 parse_pred_struct_file(config, config_file_buffer, config_file_size);
             } else {
                 fprintf(stderr, "Error channel %u: File Read Failed\n", instance_idx + 1);
-                return_error = -1;
+                return_error = EB_ErrorUndefined;
             }
         } else {
             fprintf(stderr, "Error channel %u: Memory Allocation Failed\n", instance_idx + 1);
-            return_error = -1;
+            return_error = EB_ErrorUndefined;
         }
 
         free(config_file_buffer);
@@ -2401,7 +2401,7 @@ static int32_t read_pred_struct_file(EbConfig *config, char *PredStructPath,
                 "Error channel %u: Couldn't open Manual Prediction Structure File: %s\n",
                 instance_idx + 1,
                 PredStructPath);
-        return_error = -1;
+        return_error = EB_ErrorUndefined;
     }
 
     return return_error;
