@@ -1815,7 +1815,8 @@ static int32_t find_token(int32_t argc, char *const argv[], char const *token, c
 
     while ((argc > 0) && (return_error != 0)) {
         return_error = strcmp(argv[--argc], token);
-        if (return_error == 0) { EB_STRCPY(configStr, COMMAND_LINE_MAX_SIZE, argv[argc + 1]); }
+        if (!return_error && configStr && argv[argc + 1])
+            strncpy(configStr, argv[argc + 1], COMMAND_LINE_MAX_SIZE - 1);
     }
 
     return return_error;
@@ -1948,11 +1949,11 @@ static EbErrorType verify_settings(EbConfig *config, uint32_t channel_number) {
 /******************************************
  * Find Token for multiple inputs
  ******************************************/
-int32_t find_token_multiple_inputs(int32_t argc, char *const argv[], const char *token,
-                                   char **configStr) {
+static int32_t find_token_multiple_inputs(int32_t argc, char *const argv[], const char *token,
+                                          char **configStr) {
     int32_t return_error = -1;
-    int32_t done         = 0;
-    while ((argc > 0) && (return_error != 0)) {
+    int8_t  done         = 0;
+    while (argc > 0 && return_error) {
         return_error = strcmp(argv[--argc], token);
         if (return_error == 0) {
             int32_t count;
@@ -1991,9 +1992,8 @@ static uint32_t check_long(const ConfigEntry *config_entry, const ConfigEntry *c
 }
 
 uint32_t get_help(int32_t argc, char *const argv[]) {
-    char config_string[COMMAND_LINE_MAX_SIZE];
-    if (find_token(argc, argv, HELP_TOKEN, config_string) == 0 ||
-        find_token(argc, argv, HELP_LONG_TOKEN, config_string) == 0) {
+    if (find_token(argc, argv, HELP_TOKEN, NULL) == 0 ||
+        find_token(argc, argv, HELP_LONG_TOKEN, NULL) == 0) {
         int32_t options_token_index        = -1;
         int32_t global_options_token_index = -1;
         int32_t rc_token_index             = -1;
