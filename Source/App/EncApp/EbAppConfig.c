@@ -681,181 +681,297 @@ static void set_md_stage_2_3_cand_prune_th(const char *value, EbConfig *cfg) {
     if (cfg->md_stage_2_3_cand_prune_th == 0) cfg->md_stage_2_3_cand_prune_th = (uint64_t)~0;
 }
 
-enum CfgType {
-    SINGLE_INPUT, // Configuration parameters that have only 1 value input
-    ARRAY_INPUT // Configuration parameters that have multiple values as input
-};
-
 /**********************************
  * Config Entry Struct
  **********************************/
 typedef struct config_entry_s {
-    enum CfgType type;
-    const char * token;
-    const char * name;
+    enum CfgType {
+        NO_INPUT, // Configuration parameter that do not take any input
+        SINGLE_INPUT, // Configuration parameters that have only 1 value input
+        ARRAY_INPUT // Configuration parameters that have multiple values as input
+    } type;
+    // Long option "--help"
+    const char *long_token;
+    // Short single letter option "-h"
+    const char *short_token;
+    // Compatibility token "-help"
+    const char *compat_token;
+    // Config file token
+    const char *config_token;
+    // Short description
+    const char *description;
+    // Function to call
     void (*scf)(const char *, EbConfig *);
 } ConfigEntry;
+
+#define CONFIG_STRUCT_END \
+    { 0, NULL, NULL, NULL, NULL, NULL, NULL }
 
 /**********************************
  * Config Entry Array
  **********************************/
-ConfigEntry config_entry_options[] = {
+static ConfigEntry config_entry_options[] = {
+    {NO_INPUT, "--help", "-h", "-help", NULL, "Show usage options and exit", NULL},
+
     // File I/O
-    {SINGLE_INPUT, HELP_TOKEN, "Show usage options and exit", set_cfg_input_file},
-    {SINGLE_INPUT, INPUT_FILE_TOKEN, "Input filename", set_cfg_input_file},
-    {SINGLE_INPUT, INPUT_FILE_LONG_TOKEN, "Input filename", set_cfg_input_file},
-
-    {SINGLE_INPUT, OUTPUT_BITSTREAM_TOKEN, "Output filename", set_cfg_stream_file},
-    {SINGLE_INPUT, OUTPUT_BITSTREAM_LONG_TOKEN, "Output filename", set_cfg_stream_file},
-
-    {SINGLE_INPUT, ERROR_FILE_TOKEN, "Error filename", set_cfg_error_file},
-    {SINGLE_INPUT, OUTPUT_RECON_TOKEN, "Recon filename", set_cfg_recon_file},
-    {SINGLE_INPUT, OUTPUT_RECON_LONG_TOKEN, "Recon filename", set_cfg_recon_file},
-
-    {SINGLE_INPUT, STAT_FILE_TOKEN, "Stat filename", set_cfg_stat_file},
-    {SINGLE_INPUT, NULL, NULL, NULL}
-};
+    {SINGLE_INPUT, "--input", "-i", NULL, "InputFile", "Input filename", set_cfg_input_file},
+    {SINGLE_INPUT, "--output", "-b", NULL, "StreamFile", "Output filename", set_cfg_stream_file},
+    {SINGLE_INPUT, "--errlog", NULL, "-errlog", "ErrorFile", "Error filename", set_cfg_error_file},
+    {SINGLE_INPUT, "--recon", "-o", NULL, "ReconFile", "Recon filename", set_cfg_recon_file},
+    {SINGLE_INPUT,
+     "--stat-file",
+     NULL,
+     "-stat-file",
+     "StatFile",
+     "Stat filename",
+     set_cfg_stat_file},
+    // Termination
+    CONFIG_STRUCT_END};
 
 ConfigEntry config_entry_global_options[] = {
     // Picture Dimensions
-    {SINGLE_INPUT, WIDTH_TOKEN, "Frame width", set_cfg_source_width},
-    {SINGLE_INPUT, WIDTH_LONG_TOKEN, "Frame width", set_cfg_source_width},
-
-    {SINGLE_INPUT, HEIGHT_TOKEN, "Frame height", set_cfg_source_height},
-    {SINGLE_INPUT, HEIGHT_LONG_TOKEN, "Frame height", set_cfg_source_height},
-
+    {SINGLE_INPUT, "--width", "-w", NULL, "SourceWidth", "Frame width", set_cfg_source_width},
+    {SINGLE_INPUT, "--height", "-h", NULL, "SourceHeight", "Frame height", set_cfg_source_height},
     {SINGLE_INPUT,
-     NUMBER_OF_PICTURES_TOKEN,
+     "--frames",
+     "-n",
+     NULL,
+     "FrameToBeEncoded",
      "Stop encoding after n input frames",
      set_cfg_frames_to_be_encoded},
     {SINGLE_INPUT,
-     NUMBER_OF_PICTURES_LONG_TOKEN,
-     "Stop encoding after n input frames",
-     set_cfg_frames_to_be_encoded},
-
-    {SINGLE_INPUT, BUFFERED_INPUT_TOKEN, "Buffer n input frames", set_buffered_input},
-    {SINGLE_INPUT, NO_PROGRESS_TOKEN, "Do not print out progress", set_no_progress},
+     "--nb",
+     NULL,
+     "-nb",
+     "BufferedInput",
+     "Buffer n input frames",
+     set_buffered_input},
+    {NO_INPUT,
+     "--no-progress",
+     NULL,
+     NULL,
+     "NoProgress",
+     "Do not print out progress",
+     set_no_progress},
     {SINGLE_INPUT,
-     ENCODER_COLOR_FORMAT,
+     "--color-format",
+     NULL,
+     "-color-format",
+     "EncoderColorFormat",
      "Set encoder color format(EB_YUV400, EB_YUV420, EB_YUV422, EB_YUV444)",
      set_encoder_color_format},
     {SINGLE_INPUT,
-     PROFILE_TOKEN,
-     "Bitstream profile number to use(0: main profile[default], 1: high profile, 2: professional "
-     "profile) ",
+     "--profile",
+     NULL,
+     "-profile",
+     "Profile",
+     "Bitstream profile number to use(0: main profile[default], 1: high profile, 2: "
+     "professional "
+     "profile)",
      set_profile},
-    {SINGLE_INPUT, FRAME_RATE_TOKEN, "Stream frame rate (rate/scale)", set_frame_rate},
     {SINGLE_INPUT,
-     FRAME_RATE_NUMERATOR_TOKEN,
+     "--fps",
+     NULL,
+     "-fps",
+     "FrameRate",
+     "Stream frame rate (rate/scale)",
+     set_frame_rate},
+    {SINGLE_INPUT,
+     "--fps-num",
+     NULL,
+     "-fps-num",
+     "FrameRateNumerator",
      "Stream frame rate numerator",
      set_frame_rate_numerator},
     {SINGLE_INPUT,
-     FRAME_RATE_DENOMINATOR_TOKEN,
+     "--fps-denom",
+     NULL,
+     "-fps-denom",
+     "FrameRateDenominator",
      "Stream frame rate denominator",
      set_frame_rate_denominator},
-    //{SINGLE_INPUT, ENCODER_BIT_DEPTH, "Bit depth for codec(8 or 10)", set_encoder_bit_depth},
-    {SINGLE_INPUT, INPUT_DEPTH_TOKEN, "Bit depth for codec(8 or 10)", set_encoder_bit_depth},
-    {SINGLE_INPUT, ENCODER_16BIT_PIPELINE, "Bit depth for enc-dec(0: lbd[default], 1: hbd)", set_encoder_16bit_pipeline},
-    //{SINGLE_INPUT, LEVEL_TOKEN, "Level", set_level},
     {SINGLE_INPUT,
-     HIERARCHICAL_LEVELS_TOKEN,
+     "--input-depth",
+     NULL,
+     "-bit-depth",
+     "EncoderBitDepth",
+     "Bit depth for codec(8 or 10)",
+     set_encoder_bit_depth},
+    {SINGLE_INPUT,
+     "--16bit-pipeline",
+     NULL,
+     "-16bit-pipeline",
+     "Encoder16BitPipeline",
+     "Bit depth for enc-dec(0: lbd[default], 1: hbd)",
+     set_encoder_16bit_pipeline},
+    // -level was commented out, but the config "Level" was not
+    //{SINGLE_INPUT, "--level", NULL, "-level" "Level", set_level},
+    {SINGLE_INPUT, NULL, NULL, NULL, "Level", "Level", set_level},
+    {SINGLE_INPUT,
+     "--hierarchical-levels",
+     NULL,
+     "-hierarchical-levels",
+     "HierarchicalLevels",
      "Set hierarchical levels(3 or 4[default])",
      set_hierarchical_levels},
     {SINGLE_INPUT,
-     PRED_STRUCT_TOKEN,
+     "--pred-struct",
+     NULL,
+     "-pred-struct",
+     "PredStructure",
      "Set prediction structure( 0: low delay P, 1: low delay B, 2: random access [default])",
      set_cfg_pred_structure},
-    //{SINGLE_INPUT,
-    // HDR_INPUT_TOKEN,
-    // "Enable high dynamic range(0: OFF[default], ON: 1)",
-    // set_high_dynamic_range_input},
     {SINGLE_INPUT,
-     HDR_INPUT_NEW_TOKEN,
+     "--enable-hdr",
+     NULL,
+     "-hdr",
+     "HighDynamicRangeInput",
      "Enable high dynamic range(0: OFF[default], ON: 1)",
      set_high_dynamic_range_input},
+
     // Asm Type
     {SINGLE_INPUT,
-     ASM_TYPE_TOKEN,
-     "Limit assembly instruction set [0 - 11] or [c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2,"
+     "--asm",
+     NULL,
+     "-asm",
+     "Asm",
+     "Limit assembly instruction set [0 - 11] or [c, mmx, sse, sse2, sse3, ssse3, sse4_1, "
+     "sse4_2,"
      " avx, avx2, avx512, max], by default highest level supported by CPU",
      set_asm_type},
-    {SINGLE_INPUT, THREAD_MGMNT, "number of logical processors to be used", set_logical_processors},
+
     {SINGLE_INPUT,
-     UNPIN_TOKEN,
-    "Allows the execution to be pined/unpined to/from a specific number of cores \n"
-    "The combinational use of --unpin with --lp results in memory reduction while allowing the execution to work on any of the cores and not restrict it to specific cores \n"
-    "--unpin is overwritten to 0 when --ss is set to 0 or 1. ( 0: OFF ,1: ON [default]) \n"
-    "Example: 72 core machine: \n"
-    "72 jobs x -- lp 1 -- unpin 1 \n"
-    "36 jobs x -- lp 2 -- unpin 1 \n"
-    "18 jobs x -- lp 4 -- unpin 1 ",
+     "--lp",
+     NULL,
+     "-lp",
+     "LogicalProcessors",
+     "number of logical processors to be used",
+     set_logical_processors},
+    {SINGLE_INPUT,
+     "--unpin",
+     NULL,
+     "-unpin",
+     "UnpinExecution",
+     "Allows the execution to be pined/unpined to/from a specific number of cores \n"
+     "The combinational use of --unpin with --lp results in memory reduction while allowing the "
+     "execution to work on any of the cores and not restrict it to specific cores \n"
+     "--unpin is overwritten to 0 when --ss is set to 0 or 1. ( 0: OFF ,1: ON [default]) \n"
+     "Example: 72 core machine: \n"
+     "72 jobs x -- lp 1 -- unpin 1 \n"
+     "36 jobs x -- lp 2 -- unpin 1 \n"
+     "18 jobs x -- lp 4 -- unpin 1 ",
      set_unpin_execution},
-    {SINGLE_INPUT, TARGET_SOCKET, "Specify  which socket the encoder runs on"
-    "--unpin is overwritten to 0 when --ss is set to 0 or 1",
-    set_target_socket},
+    {SINGLE_INPUT,
+     "--ss",
+     NULL,
+     "-ss",
+     "Specify  which socket the encoder runs on"
+     "--unpin is overwritten to 0 when --ss is set to 0 or 1",
+     set_target_socket},
     // Termination
-    {SINGLE_INPUT, NULL, NULL, NULL}
-};
+    CONFIG_STRUCT_END};
 
 ConfigEntry config_entry_rc[] = {
     // Rate Control
     {SINGLE_INPUT,
-     RATE_CONTROL_ENABLE_TOKEN,
+     "--rc",
+     NULL,
+     "-rc",
+     "RateControlMode",
      "Rate control mode(0 = CQP , 1 = VBR , 2 = CVBR)",
      set_rate_control_mode},
-    {SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "Target Bitrate (kbps)", set_target_bit_rate},
     {SINGLE_INPUT,
-     USE_QP_FILE_TOKEN,
+     "--tbr",
+     NULL,
+     "-tbr",
+     "TargetBitRate",
+     "Target Bitrate (kbps)",
+     set_target_bit_rate},
+    {SINGLE_INPUT,
+     "--use-q-file",
+     NULL,
+     "-use-q-file",
+     "UseQpFile",
      "Overwrite QP assignment using qp values in QP file",
      set_cfg_use_qp_file},
-    //{SINGLE_INPUT, QP_FILE_TOKEN, "Path to Qp file", set_cfg_qp_file},
-    {SINGLE_INPUT, QP_FILE_NEW_TOKEN, "Path to Qp file", set_cfg_qp_file},
-    {SINGLE_INPUT, MAX_QP_TOKEN, "Maximum (worst) quantizer[0-63]", set_max_qp_allowed},
-    {SINGLE_INPUT, MIN_QP_TOKEN, "Minimum (best) quantizer[0-63]", set_min_qp_allowed},
-    //{SINGLE_INPUT,
-    // ADAPTIVE_QP_ENABLE_TOKEN,
-    // "Set adaptive QP level(0: OFF ,1: variance base using segments ,2: Deltaq pred efficiency)",
-    // set_adaptive_quantization},
+    {SINGLE_INPUT, "--qpfile", NULL, "-qp-file", "QpFile", "Path to Qp file", set_cfg_qp_file},
     {SINGLE_INPUT,
-     ADAPTIVE_QP_ENABLE_TOKEN,
+     "--max-qp",
+     NULL,
+     "-max-qp",
+     "MaxQpAllowed",
+     "Maximum (worst) quantizer[0-63]",
+     set_max_qp_allowed},
+    {SINGLE_INPUT,
+     "--min-qp",
+     NULL,
+     "-min-qp",
+     "MinQpAllowed",
+     "Minimum (best) quantizer[0-63]",
+     set_min_qp_allowed},
+    {SINGLE_INPUT,
+     "--adaptive-quantization",
+     NULL,
+     "-adaptive-quantization",
+     "AdaptiveQuantization",
      "Set adaptive QP level(0: OFF ,1: variance base using segments ,2: Deltaq pred efficiency)",
      set_adaptive_quantization},
-    {SINGLE_INPUT, VBV_BUFSIZE_TOKEN, "VBV buffer size", set_vbv_buf_size},
-    // Termination
-    {SINGLE_INPUT, NULL, NULL, NULL}
-};
-ConfigEntry config_entry_2p[] = {
-    // 2 pass
-    {SINGLE_INPUT, OUTPUT_STAT_FILE_TOKEN, "First pass stat file output", set_output_stat_file},
     {SINGLE_INPUT,
-     INPUT_STAT_FILE_TOKEN,
+     "--vbv-bufsize",
+     NULL,
+     "-vbv-bufsize",
+     "VBVBufSize",
+     "VBV buffer size",
+     set_vbv_buf_size},
+    // Termination
+    CONFIG_STRUCT_END};
+
+static ConfigEntry config_entry_2p[] = {
+    // 2 pass
+    {SINGLE_INPUT,
+     "--output-stat-file",
+     NULL,
+     "-output-stat-file",
+     "OutputStatFile",
+     "First pass stat file output",
+     set_output_stat_file},
+    {SINGLE_INPUT,
+     "--input-stat-file",
+     NULL,
+     "-input-stat-file",
+     "InputStatFile",
      "Input the first pass output to the second pass",
      set_input_stat_file},
     {SINGLE_INPUT,
-     ENCMODE2P_TOKEN,
+     "--enc-mode-2p",
+     NULL,
+     "-enc-mode-2p",
+     "EncoderMode2p",
      "Use Hme/Me settings of the second pass'encoder mode in the first pass",
      set_snd_pass_enc_mode},
     // Termination
-    {SINGLE_INPUT, NULL, NULL, NULL}
-};
-ConfigEntry config_entry_intra_refresh[] = {
+    CONFIG_STRUCT_END};
+
+static ConfigEntry config_entry_intra_refresh[] = {
     // File I/O
-    //{SINGLE_INPUT,
-    // INTRA_PERIOD_TOKEN,
-    //"Intra period interval(frames) (-2: No intra update, -1: default intra period or [0-255])",
-    // set_cfg_intra_period},
     {SINGLE_INPUT,
-     KEYINT_TOKEN,
+     "--keyint",
+     NULL,
+     "-intra-period",
+     "IntraPeriod",
      "Intra period interval(frames) (-2: No intra update, -1: default intra period or [0-255])",
      set_cfg_intra_period},
     {SINGLE_INPUT,
-     INTRA_REFRESH_TYPE_TOKEN,
+     "--irefresh-type", // Marked as no eval(?)
+     NULL,
+     "-irefresh-type",
+     "IntraRefreshType",
      "Intra refresh type (1: CRA (Open GOP)2: IDR (Closed GOP))",
-     set_tile_row},
+     set_cfg_intra_refresh_type},
     // Termination
-    {SINGLE_INPUT, NULL, NULL, NULL}
-};
-ConfigEntry config_entry_specific[] = {
+    CONFIG_STRUCT_END};
+
+static ConfigEntry config_entry_specific[] = {
     // Prediction Structure
     //{SINGLE_INPUT, ENCMODE_TOKEN, "Encoder mode/Preset used[0-8]", set_enc_mode},
     {SINGLE_INPUT, PRESET_TOKEN, "Encoder mode/Preset used[0-8]", set_enc_mode},
@@ -1199,10 +1315,8 @@ ConfigEntry config_entry_specific[] = {
     //NX4_4XN_MV_INJECT_NEW_TOKEN,
     // "nx4ParentMvInjection",
     // set_nx4_4xn_parent_mv_inject_flag},
-
     // Termination
-    {SINGLE_INPUT, NULL, NULL, NULL}
-};
+    CONFIG_STRUCT_END};
 
 ConfigEntry config_entry[] = {
     // File I/O
@@ -1512,10 +1626,10 @@ ConfigEntry config_entry[] = {
     {SINGLE_INPUT, INTRA_ANGLE_DELTA_NEW_TOKEN, "Intra Angle Delta", set_intra_angle_delta_flag},
     {SINGLE_INPUT, PAETH_NEW_TOKEN, "Paeth New Token", set_enable_paeth_flag},
     {SINGLE_INPUT, SMOOTH_NEW_TOKEN, "Smooth New Token", set_enable_smooth_flag},
-
     // Termination
-    {SINGLE_INPUT, NULL, NULL, NULL}
-};
+    CONFIG_STRUCT_END};
+
+#undef CONFIG_STRUCT_END
 
 /**********************************
  * Constructor
@@ -1816,7 +1930,7 @@ static int32_t find_token(int32_t argc, char *const argv[], char const *token, c
     while ((argc > 0) && (return_error != 0)) {
         return_error = strcmp(argv[--argc], token);
         if (!return_error && configStr && argv[argc + 1])
-            strncpy(configStr, argv[argc + 1], COMMAND_LINE_MAX_SIZE - 1);
+            EB_STRCPY(configStr, COMMAND_LINE_MAX_SIZE - 1, argv[argc + 1]);
     }
 
     return return_error;
@@ -2233,12 +2347,12 @@ int32_t compute_frames_to_be_encoded(EbConfig *config) {
 
     frame_size = config->input_padded_width * config->input_padded_height; // Luma
     frame_size += 2 * (frame_size >> (3 - config->encoder_color_format)); // Add Chroma
-    frame_size = frame_size << ((config->encoder_bit_depth == 10) ? 1 : 0);
+    frame_size <<= (config->encoder_bit_depth == 10) ? 1 : 0;
 
     if (frame_size == 0) return -1;
 
     if (config->encoder_bit_depth == 10 && config->compressed_ten_bit_format == 1)
-        frame_count = (int32_t)(2 * ((double)file_size / frame_size) / 1.25);
+        frame_count = (int32_t)(2 * (double)file_size / frame_size / 1.25);
     else
         frame_count = (int32_t)(file_size / frame_size);
 
@@ -2516,19 +2630,17 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
     if (find_token_multiple_inputs(argc, argv, CONFIG_FILE_TOKEN, config_strings) == 0) {
         mark_token_as_read(CONFIG_FILE_TOKEN, cmd_copy, &cmd_token_cnt);
         // Parse the config file
-        for (index = 0; index < num_channels; ++index) {
-            return_errors[index] =
-                (EbErrorType)read_config_file(configs[index], config_strings[index], index);
-            return_error = (EbErrorType)(return_error & return_errors[index]);
+        for (uint32_t index = 0; index < num_channels; ++index) {
+            return_errors[index] = read_config_file(configs[index], config_strings[index], index);
+            return_error         = (EbErrorType)(return_error & return_errors[index]);
         }
     } else if (find_token_multiple_inputs(argc, argv, CONFIG_FILE_LONG_TOKEN, config_strings) ==
                0) {
         mark_token_as_read(CONFIG_FILE_LONG_TOKEN, cmd_copy, &cmd_token_cnt);
         // Parse the config file
-        for (index = 0; index < num_channels; ++index) {
-            return_errors[index] =
-                (EbErrorType)read_config_file(configs[index], config_strings[index], index);
-            return_error = (EbErrorType)(return_error & return_errors[index]);
+        for (uint32_t index = 0; index < num_channels; ++index) {
+            return_errors[index] = read_config_file(configs[index], config_strings[index], index);
+            return_error         = (EbErrorType)(return_error & return_errors[index]);
         }
     } else {
         if (find_token(argc, argv, CONFIG_FILE_TOKEN, config_string) == 0) {
@@ -2615,9 +2727,10 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
     /***************************************************************************************************/
     /*******************************   Parse manual prediction structure  ******************************/
     /***************************************************************************************************/
-    for (index = 0; index < num_channels; ++index) {
-        if ((configs[index])->enable_manual_pred_struct == EB_TRUE) {
-            return_errors[index] = (EbErrorType)read_pred_struct_file(configs[index], configs[index]->input_pred_struct_filename, index);
+    for (uint32_t index = 0; index < num_channels; ++index) {
+        if (configs[index]->enable_manual_pred_struct == EB_TRUE) {
+            return_errors[index] = read_pred_struct_file(
+                configs[index], configs[index]->input_pred_struct_filename, index);
             return_error = (EbErrorType)(return_error & return_errors[index]);
         }
     }
