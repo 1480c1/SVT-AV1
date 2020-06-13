@@ -47,6 +47,8 @@ jobs:
             allows-failure: false
             run-prefix: TSAN_OPTIONS="suppressions=./.github/workflows/sanitizers-known-warnings.txt"
 
+          - sanitizer: undefined
+            allows-failure: false
     env:
       CFLAGS: -fsanitize=${{ matrix.sanitizer-type }} ${{ matrix.CFLAGS }}
       CXXFLAGS: -fsanitize=${{ matrix.sanitizer-type }} ${{ matrix.CXXFLAGS }}
