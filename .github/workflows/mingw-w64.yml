@@ -34,7 +34,6 @@ jobs:
         with:
           repository: FFmpeg/FFmpeg
           path: ffmpeg
-          fetch-depth: 1
       - name: Cache ccache files
         uses: actions/cache@v2
         with:
@@ -87,8 +86,25 @@ jobs:
           }
       - name: Build FFmpeg
         run: make -j 10
+
+      - name: Get Current Release
+        id: get_release
+        shell: bash
+        run: echo "::set-output name=upload_url::$(curl -L https://api.github.com/repos/${{ github.repository }}/releases/tags/$(cut -d/ -f3 <<< ${{ github.ref }}) | jq -r ."upload_url")"
+
       - name: Upload ffmpeg (mingw-w64)
+        if: steps.get_release.outputs.upload_url == ''
         uses: actions/upload-artifact@v2
         with:
           name: svtav1-mingw-w64-ffmpeg
           path: ffmpeg.exe
+      - name: Upload static ffmpeg.exe
+        if: steps.get_release.outputs.upload_url != ''
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ffmpeg.exe
+          asset_name: ffmpeg.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
