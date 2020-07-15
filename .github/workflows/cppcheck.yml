@@ -34,3 +34,19 @@ jobs:
             -j $(nproc) \
             --template="::error file={file},line={line},col={column}::{severity}: {message} ({id})\n{file}:{line}" \
             -ithird_party
+  codeql:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: cpp
+      - name: Install dependencies
+        run: sudo apt-get install -y yasm
+      - name: Run CMake
+        run: cmake -B Build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - name: Run build
+        run: make -j -C Build
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
