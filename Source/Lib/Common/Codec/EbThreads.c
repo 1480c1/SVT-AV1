@@ -67,7 +67,7 @@ EbHandle svt_create_thread(void *thread_function(void *), void *thread_context) 
     thread_handle = (EbHandle)CreateThread(
         NULL, // default security attributes
         0, // default stack size
-        (LPTHREAD_START_ROUTINE)thread_function, // function to be tied to the new thread
+        thread_function, // function to be tied to the new thread
         thread_context, // context to be tied to the new thread
         0, // thread active when created
         NULL); // new thread ID
