@@ -967,14 +967,10 @@ void process_input_buffer(EncChannel *channel) {
     channel->exit_cond_input = return_value;
 }
 
-#define LONG_ENCODE_FRAME_ENCODE 4000
 #define SPEED_MEASUREMENT_INTERVAL 2000
-#define START_STEADY_STATE 1000
 #define AV1_FOURCC 0x31305641 // used for ivf header
 #define IVF_STREAM_HEADER_SIZE 32
 #define IVF_FRAME_HEADER_SIZE 12
-#define OBU_FRAME_HEADER_SIZE 3
-#define TD_SIZE 2
 static __inline void mem_put_le32(void *vmem, int32_t val) {
     uint8_t *mem = (uint8_t *)vmem;
 
@@ -983,7 +979,6 @@ static __inline void mem_put_le32(void *vmem, int32_t val) {
     mem[2] = (uint8_t)((val >> 16) & 0xff);
     mem[3] = (uint8_t)((val >> 24) & 0xff);
 }
-#define MEM_VALUE_T_SZ_BITS (sizeof(MEM_VALUE_T) << 3)
 
 static __inline void mem_put_le16(void *vmem, int32_t val) {
     uint8_t *mem = (uint8_t *)vmem;
