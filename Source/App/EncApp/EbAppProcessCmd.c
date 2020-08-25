@@ -1020,24 +1020,15 @@ static void write_ivf_stream_header(EbConfig *config) {
     if (config->bitstream_file)
         fwrite(header, 1, IVF_STREAM_HEADER_SIZE, config->bitstream_file);
 
-    return;
 }
 
 static void write_ivf_frame_header(EbConfig *config, uint32_t byte_count) {
-    char    header[IVF_FRAME_HEADER_SIZE];
-    int32_t write_location = 0;
-
-    mem_put_le32(&header[write_location], (int32_t)byte_count);
-    write_location = write_location + 4;
-    mem_put_le32(&header[write_location], (int32_t)((config->ivf_count) & 0xFFFFFFFF));
-    write_location = write_location + 4;
-    mem_put_le32(&header[write_location], (int32_t)((config->ivf_count) >> 32));
-
-    config->byte_count_since_ivf = (byte_count);
-
+    char header[IVF_FRAME_HEADER_SIZE];
+    mem_put_le32(header, (int32_t)byte_count);
+    mem_put_le32(header + 4, (int32_t)(config->ivf_count & 0xFFFFFFFF));
+    mem_put_le32(header + 8, (int32_t)(config->ivf_count >> 32));
+    config->byte_count_since_ivf = byte_count;
     config->ivf_count++;
-    fflush(stdout);
-
     if (config->bitstream_file)
         fwrite(header, 1, IVF_FRAME_HEADER_SIZE, config->bitstream_file);
 }
