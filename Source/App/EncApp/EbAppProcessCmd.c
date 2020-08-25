@@ -1041,15 +1041,8 @@ static void write_ivf_frame_header(EbConfig *config, uint32_t byte_count) {
     if (config->bitstream_file)
         fwrite(header, 1, IVF_FRAME_HEADER_SIZE, config->bitstream_file);
 }
-double get_psnr(double sse, double max) {
-    double psnr;
-    if (sse == 0)
-        psnr = 10 * log10(max / (double)0.1);
-    else
-        psnr = 10 * log10(max / sse);
 
-    return psnr;
-}
+double get_psnr(double sse, double max) { return log10(max / (sse ? sse : 0.1)) * 10.0; }
 
 /***************************************
 * Process Output STATISTICS Buffer
