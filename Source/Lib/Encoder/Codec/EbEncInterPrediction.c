@@ -2435,17 +2435,17 @@ static void calc_target_weighted_pred(PictureControlSet *  picture_control_set_p
         src += src_pic->stride_y;
     }
 }
+
 /* perform all neigh predictions and get wighted src to be used for obmc
 motion refinement
 */
 void precompute_obmc_data(PictureControlSet *  picture_control_set_ptr,
                           ModeDecisionContext *context_ptr) {
-    // cppcheck-suppress unassignedVariable
-    DECLARE_ALIGNED(16, uint8_t, junk_2b[6 * MAX_MB_PLANE * MAX_SB_SQUARE]);
-    uint8_t *tmp_obmc_bufs[] = {
-        context_ptr->obmc_buff_0,
-        context_ptr->obmc_buff_1,
-    };
+    uint8_t *junk_2b = malloc(sizeof(*junk_2b) * 6 * MAX_MB_PLANE * MAX_SB_SQUARE);
+    EB_NO_THROW_ADD_MEM(junk_2b, sizeof(*junk_2b) * 6 * MAX_MB_PLANE * MAX_SB_SQUARE, EB_N_PTR);
+    if (!junk_2b)
+        return;
+
     uint8_t *dst_buf1_8b = junk_2b + 2 * MAX_MB_PLANE * MAX_SB_SQUARE,
             *dst_buf2_8b = junk_2b + 4 * MAX_MB_PLANE * MAX_SB_SQUARE;
 
@@ -2453,31 +2453,27 @@ void precompute_obmc_data(PictureControlSet *  picture_control_set_ptr,
     int      dst_stride1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
     int      dst_stride2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
 
-    {
-        if (context_ptr->hbd_mode_decision) {
-            dst_buf1[0] = (uint8_t *)((uint16_t *)tmp_obmc_bufs[0]);
-            dst_buf1[1] = (uint8_t *)((uint16_t *)tmp_obmc_bufs[0] + MAX_SB_SQUARE);
-            dst_buf1[2] = (uint8_t *)((uint16_t *)tmp_obmc_bufs[0] + MAX_SB_SQUARE * 2);
-            dst_buf2[0] = (uint8_t *)((uint16_t *)tmp_obmc_bufs[1]);
-            dst_buf2[1] = (uint8_t *)((uint16_t *)tmp_obmc_bufs[1] + MAX_SB_SQUARE);
-            dst_buf2[2] = (uint8_t *)((uint16_t *)tmp_obmc_bufs[1] + MAX_SB_SQUARE * 2);
-        } else {
-            dst_buf1[0] = tmp_obmc_bufs[0];
-            dst_buf1[1] = tmp_obmc_bufs[0] + MAX_SB_SQUARE;
-            dst_buf1[2] = tmp_obmc_bufs[0] + MAX_SB_SQUARE * 2;
-            dst_buf2[0] = tmp_obmc_bufs[1];
-            dst_buf2[1] = tmp_obmc_bufs[1] + MAX_SB_SQUARE;
-            dst_buf2[2] = tmp_obmc_bufs[1] + MAX_SB_SQUARE * 2;
-        }
+    if (context_ptr->hbd_mode_decision) {
+        dst_buf1[0] = context_ptr->obmc_buff_0;
+        dst_buf1[1] = (uint8_t *)((uint16_t *)context_ptr->obmc_buff_0 + MAX_SB_SQUARE);
+        dst_buf1[2] = (uint8_t *)((uint16_t *)context_ptr->obmc_buff_0 + MAX_SB_SQUARE * 2);
+        dst_buf2[0] = context_ptr->obmc_buff_1;
+        dst_buf2[1] = (uint8_t *)((uint16_t *)context_ptr->obmc_buff_1 + MAX_SB_SQUARE);
+        dst_buf2[2] = (uint8_t *)((uint16_t *)context_ptr->obmc_buff_1 + MAX_SB_SQUARE * 2);
+    } else {
+        dst_buf1[0] = context_ptr->obmc_buff_0;
+        dst_buf1[1] = context_ptr->obmc_buff_0 + MAX_SB_SQUARE;
+        dst_buf1[2] = context_ptr->obmc_buff_0 + MAX_SB_SQUARE * 2;
+        dst_buf2[0] = context_ptr->obmc_buff_1;
+        dst_buf2[1] = context_ptr->obmc_buff_1 + MAX_SB_SQUARE;
+        dst_buf2[2] = context_ptr->obmc_buff_1 + MAX_SB_SQUARE * 2;
     }
-    int mi_row = context_ptr->blk_origin_y >> 2;
-    int mi_col = context_ptr->blk_origin_x >> 2;
     build_prediction_by_above_preds(1,
                                     context_ptr->blk_geom->bsize,
                                     picture_control_set_ptr,
                                     context_ptr->blk_ptr->av1xd,
-                                    mi_row,
-                                    mi_col,
+                                    context_ptr->blk_origin_y >> 2,
+                                    context_ptr->blk_origin_x >> 2,
                                     dst_buf1,
                                     dst_stride1,
                                     context_ptr->hbd_mode_decision);
@@ -2486,8 +2482,8 @@ void precompute_obmc_data(PictureControlSet *  picture_control_set_ptr,
                                    context_ptr->blk_geom->bsize,
                                    picture_control_set_ptr,
                                    context_ptr->blk_ptr->av1xd,
-                                   mi_row,
-                                   mi_col,
+                                   context_ptr->blk_origin_y >> 2,
+                                   context_ptr->blk_origin_x >> 2,
                                    dst_buf2,
                                    dst_stride2,
                                    context_ptr->hbd_mode_decision);
@@ -2514,12 +2510,13 @@ void precompute_obmc_data(PictureControlSet *  picture_control_set_ptr,
                               context_ptr,
                               picture_control_set_ptr->parent_pcs_ptr->av1_cm,
                               context_ptr->blk_ptr->av1xd,
-                              mi_row,
-                              mi_col,
+                              context_ptr->blk_origin_y >> 2,
+                              context_ptr->blk_origin_x >> 2,
                               context_ptr->hbd_mode_decision ? dst_buf1_8b : dst_buf1[0],
                               dst_stride1[0],
                               context_ptr->hbd_mode_decision ? dst_buf2_8b : dst_buf2[0],
                               dst_stride2[0]);
+    EB_FREE(junk_2b);
 }
 
 static void chroma_plane_warped_motion_prediction_sub8x8(
