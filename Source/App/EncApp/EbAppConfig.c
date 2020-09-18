@@ -230,7 +230,12 @@ static EbBool fopen_and_lock(FILE **file, const char *name, EbBool write) {
         return EB_FALSE;
 
     const char *mode = write ? "wb" : "rb";
-    FOPEN(*file, name, mode);
+#ifdef _WIN32
+    if (fopen_s(file, name, mode))
+        return EB_FALSE;
+#else
+    *file  = fopen(name, mode);
+#endif
     if (!*file)
         return EB_FALSE;
 
