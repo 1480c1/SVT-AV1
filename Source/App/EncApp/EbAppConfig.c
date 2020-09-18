@@ -276,7 +276,7 @@ static void set_cfg_input_file(const char *filename, EbConfig *cfg) {
     }
 
 #ifdef _WIN32
-    HANDLE handle = (HANDLE)_get_osfhandle(_fileno(cfg->input_file));
+    HANDLE handle = get_file_handle(cfg->input_file);
     if (handle == INVALID_HANDLE_VALUE)
         return;
     cfg->input_file_is_fifo = GetFileType(handle) == FILE_TYPE_PIPE;
