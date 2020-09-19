@@ -381,6 +381,7 @@ static void set_no_progress(const char *value, EbConfig *cfg) {
     default: cfg->progress = 0; break; // equal to --progress 0
     }
 }
+
 static void set_progress(const char *value, EbConfig *cfg) {
     switch (value ? *value : '1') {
     case '0': cfg->progress = 0; break; // no progress printed
