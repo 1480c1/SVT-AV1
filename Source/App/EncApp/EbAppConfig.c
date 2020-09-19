@@ -350,7 +350,6 @@ static void set_passes(const char *value, EbConfig *cfg) {
     (void)value;
     (void)cfg;
     /* empty function, we will handle passes at higher level*/
-    return;
 }
 
 static void set_cfg_stat_file(const char *value, EbConfig *cfg) {
