@@ -372,7 +372,7 @@ static void set_cfg_frames_to_be_encoded(const char *value, EbConfig *cfg) {
 }
 
 static void set_buffered_input(const char *value, EbConfig *cfg) {
-    cfg->buffered_input = strtol(value, NULL, 0);
+    cfg->buffered_input = (int32_t)strtol(value, NULL, 0);
 };
 static void set_no_progress(const char *value, EbConfig *cfg) {
     switch (value ? *value : '1') {
