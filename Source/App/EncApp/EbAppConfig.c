@@ -331,7 +331,7 @@ static void set_cfg_qp_file(const char *value, EbConfig *cfg) {
     FOPEN(cfg->qp_file, value, "r");
 };
 
-static void set_pass(const char* value, EbConfig *cfg) {
+static void set_pass(const char *value, EbConfig *cfg) {
     switch (value ? *value : '1') {
     case '2': cfg->pass = 2; return;
     default: cfg->pass = 1; return;
