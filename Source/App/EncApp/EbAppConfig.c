@@ -389,6 +389,7 @@ static void set_progress(const char *value, EbConfig *cfg) {
     default: cfg->progress = 1; break; // default progress
     }
 }
+
 static void set_frame_rate(const char *value, EbConfig *cfg) {
     cfg->config.frame_rate = strtoul(value, NULL, 0);
     if (cfg->config.frame_rate <= 1000)
