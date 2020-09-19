@@ -359,7 +359,7 @@ static void set_cfg_stat_file(const char *value, EbConfig *cfg) {
     FOPEN(cfg->stat_file, value, "wb");
 };
 static void set_stat_report(const char *value, EbConfig *cfg) {
-    cfg->config.stat_report = (uint8_t)strtoul(value, NULL, 0);
+    cfg->config.stat_report = value ? !!(*value - '0') : 0;
 };
 static void set_cfg_source_width(const char *value, EbConfig *cfg) {
     cfg->config.source_width = strtoul(value, NULL, 0);
