@@ -211,13 +211,13 @@ static int find_translation(int np, double *pts1, double *pts2, double *mat) {
 static int find_rotzoom(int np, double *pts1, double *pts2, double *mat) {
     const int np2  = np * 2;
     double *  a    = (double *)malloc(sizeof(*a) * (np2 * 5 + 20));
+    assert(a != NULL);
     double *  b    = a + np2 * 4;
     double *  temp = b + np2;
 
     double t1[9], t2[9];
     normalize_homography(pts1, np, t1);
     normalize_homography(pts2, np, t2);
-    assert(a != NULL);
     for (int i = 0; i < np; ++i) {
         double dx = *(pts2++);
         double dy = *(pts2++);
