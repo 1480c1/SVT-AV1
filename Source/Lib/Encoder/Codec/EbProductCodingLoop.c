@@ -252,25 +252,25 @@ void mode_decision_update_neighbor_arrays(PictureControlSet *  pcs_ptr,
                                    bheight,
                                    NEIGHBOR_ARRAY_UNIT_LEFT_MASK);
 
-    // Update the Inter Pred Type Neighbor Array
-    if (!context_ptr->shut_fast_rate)
-    neighbor_array_unit_mode_write(context_ptr->inter_pred_dir_neighbor_array,
-                                   &inter_pred_direction_index,
-                                   origin_x,
-                                   origin_y,
-                                   bwdith,
-                                   bheight,
-                                   NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+    if (!context_ptr->shut_fast_rate) {
+        // Update the Inter Pred Type Neighbor Array
+        neighbor_array_unit_mode_write(context_ptr->inter_pred_dir_neighbor_array,
+                                       &inter_pred_direction_index,
+                                       origin_x,
+                                       origin_y,
+                                       bwdith,
+                                       bheight,
+                                       NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
 
-    // Update the refFrame Type Neighbor Array
-    if (!context_ptr->shut_fast_rate)
-    neighbor_array_unit_mode_write(context_ptr->ref_frame_type_neighbor_array,
-                                   &ref_frame_type,
-                                   origin_x,
-                                   origin_y,
-                                   bwdith,
-                                   bheight,
-                                   NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+        // Update the refFrame Type Neighbor Array
+        neighbor_array_unit_mode_write(context_ptr->ref_frame_type_neighbor_array,
+                                       &ref_frame_type,
+                                       origin_x,
+                                       origin_y,
+                                       bwdith,
+                                       bheight,
+                                       NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+    }
     if (!context_ptr->skip_intra) {
     if (!context_ptr->hbd_mode_decision) {
         update_recon_neighbor_array(
