@@ -286,14 +286,15 @@ static void set_cfg_input_file(const char *filename, EbConfig *cfg) {
 };
 
 static void set_pred_struct_file(const char *value, EbConfig *cfg) {
-    if (cfg->input_pred_struct_filename) {
+    if (cfg->input_pred_struct_filename)
         free(cfg->input_pred_struct_filename);
-    }
-    cfg->input_pred_struct_filename = (char *)malloc(strlen(value) + 1);
-    strcpy_s(cfg->input_pred_struct_filename, strlen(value) + 1, value);
-
+#ifndef _WIN32
+    cfg->input_pred_struct_filename = strdup(value);
+#else
+    cfg->input_pred_struct_filename = _strdup(value);
+#endif
     cfg->config.enable_manual_pred_struct = EB_TRUE;
-};
+}
 
 static void set_cfg_stream_file(const char *value, EbConfig *cfg) {
     if (cfg->bitstream_file && cfg->bitstream_file != stdout) {
