@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <ctype.h>
 
 #include "EbVersion.h"
 #include "EbThreads.h"
@@ -154,51 +155,50 @@ uint32_t get_num_processors() {
 #endif
 }
 
-EbErrorType init_thread_management_params() {
+static EbErrorType init_thread_management_params() {
 #ifdef _WIN32
     // Initialize group_affinity structure with Current thread info
     GetThreadGroupAffinity(GetCurrentThread(), &group_affinity);
     num_groups = (uint8_t)GetActiveProcessorGroupCount();
 #elif defined(__linux__)
-    memset(lp_group, 0, INITIAL_PROCESSOR_GROUP * sizeof(processorGroup));
+    memset(lp_group, 0, INITIAL_PROCESSOR_GROUP * sizeof(*lp_group));
 
     FILE *fin = fopen("/proc/cpuinfo", "r");
-    if (fin) {
-        int processor_id = 0;
-        int maxSize = INITIAL_PROCESSOR_GROUP;
-        char line[1024];
-        while (fgets(line, sizeof(line), fin)) {
-            if(strncmp(line, "processor", 9) == 0) {
-                char* p = line + 9;
-                while(*p < '0' || *p > '9') p++;
-                processor_id = strtol(p, NULL, 0);
+    if (!fin) return EB_ErrorNone;
+    int processor_id = 0;
+    int maxSize = INITIAL_PROCESSOR_GROUP;
+    char line[1024];
+    while (fgets(line, sizeof(line), fin)) {
+        if(!strncmp(line, "processor", 9)) {
+            char* p = line + 9;
+            while(!isdigit(*p)) ++p;
+            processor_id = strtol(p, NULL, 0);
+        } else if(!strncmp(line, "physical id", 11)) {
+            char* p = line + 11;
+            while(!isdigit(*p)) ++p;
+            const long socket_id = strtol(p, NULL, 0);
+            if (socket_id < 0) {
+                fclose(fin);
+                return EB_ErrorInsufficientResources;
             }
-            if(strncmp(line, "physical id", 11) == 0) {
-                char* p = line + 11;
-                while(*p < '0' || *p > '9') p++;
-                long socket_id = strtol(p, NULL, 0);
-                if (socket_id < 0) {
+            if (socket_id + 1 > num_groups)
+                num_groups = socket_id + 1;
+            if (socket_id >= maxSize) {
+                maxSize *= 2;
+                processorGroup *temp = realloc(lp_group, maxSize * sizeof(*temp));
+                if (temp)
+                    lp_group = temp;
+                else {
+                    free(lp_group);
+                    lp_group = NULL;
                     fclose(fin);
                     return EB_ErrorInsufficientResources;
                 }
-                if (socket_id + 1 > num_groups)
-                    num_groups = socket_id + 1;
-                if (socket_id >= maxSize) {
-                    maxSize = maxSize * 2;
-                    processorGroup *temp = realloc(lp_group, maxSize * sizeof(*temp));
-                    if (temp)
-                        lp_group = temp;
-                    else {
-                        free(lp_group);
-                        fclose(fin);
-                        return EB_ErrorInsufficientResources;
-                    }
-                }
-                lp_group[socket_id].group[lp_group[socket_id].num++] = processor_id;
             }
+            lp_group[socket_id].group[lp_group[socket_id].num++] = processor_id;
         }
-        fclose(fin);
     }
+    fclose(fin);
 #endif
     return EB_ErrorNone;
 }
