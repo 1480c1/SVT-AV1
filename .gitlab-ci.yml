@@ -159,6 +159,7 @@ valgrind:
       - address/
       - memory/
       - thread/
+      - undefined/
 
 sanitizer address:
   extends: .sanitizer compile
@@ -183,6 +184,14 @@ sanitizer thread:
     EXTRA_CXXFLAGS: -fsanitize=thread
     LDFLAGS: -fsanitize=thread
     EXTRA_CMAKE_FLAGS: -DCMAKE_OUTPUT_DIRECTORY=thread
+
+sanitizer undefined:
+  extends: .sanitizer compile
+  variables:
+    EXTRA_CFLAGS: -fsanitize=undefined
+    EXTRA_CXXFLAGS: -fsanitize=undefined
+    LDFLAGS: -fsanitize=undefined
+    EXTRA_CMAKE_FLAGS: -DCMAKE_OUTPUT_DIRECTORY=undefined
 
 .sanitizer test:
   extends: .tests
@@ -216,6 +225,12 @@ sanitizer thread test:
   allow_failure: true
   variables:
     SANITIZER: thread
+
+
+sanitizer undefined test:
+  extends: .sanitizer test
+  variables:
+    SANITIZER: undefined
 
 .unit tests:
   extends: .tests
