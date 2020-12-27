@@ -72,7 +72,7 @@ extern uint64_t *        total_lib_memory; // library Memory malloc'd
             SetThreadGroupAffinity(pointer, &group_affinity, NULL);   \
     } while (0)
 
-#elif defined(__linux__)
+#else
 #ifndef __USE_GNU
 #define __USE_GNU
 #endif
@@ -81,6 +81,7 @@ extern uint64_t *        total_lib_memory; // library Memory malloc'd
 #endif
 #include <sched.h>
 #include <pthread.h>
+#if defined(__linux__)
 #define EB_CREATE_THREAD(pointer, thread_function, thread_context)                           \
     do {                                                                                     \
         pointer = svt_create_thread(thread_function, thread_context);                        \
@@ -93,6 +94,7 @@ extern uint64_t *        total_lib_memory; // library Memory malloc'd
         pointer = svt_create_thread(thread_function, thread_context); \
         EB_ADD_MEM(pointer, 1, EB_THREAD);                            \
     } while (0)
+#endif
 #endif
 
 #define EB_DESTROY_THREAD(pointer)                   \
