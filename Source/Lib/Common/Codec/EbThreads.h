@@ -120,6 +120,27 @@ extern uint64_t *        total_lib_memory; // library Memory malloc'd
     } while (0)
 
 void atomic_set_u32(AtomicVarU32 *var, uint32_t in);
+
+#if FIX_DDL
+/*
+ Condition variable
+*/
+typedef struct CondVar {
+    int32_t val;
+#ifdef _WIN32
+    CRITICAL_SECTION   cs;
+    CONDITION_VARIABLE cv;
+#else
+    pthread_mutex_t m_mutex;
+    pthread_cond_t  m_cond;
+#endif
+} CondVar;
+
+void svt_set_cond_var(CondVar *cond_var, int32_t newval);
+void svt_wait_cond_var(CondVar *cond_var, int32_t input);
+void svt_create_cond_var(CondVar *cond_var);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
