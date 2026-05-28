@@ -94,7 +94,7 @@ jobs:
 
       - name: Run style check
         env:
-          CI_REPOSITORY_URL: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/AOMediaCodec/SVT-AV1.git
+          CI_REPOSITORY_URL: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/1480c1/SVT-AV1-Test1.git # Hard code a repo for now.
           CI_MERGE_REQUEST_TARGET_BRANCH_NAME: ${{ github.event.pull_request.base.ref || 'HEAD' }}
         run: ./test/stylecheck.sh
 
