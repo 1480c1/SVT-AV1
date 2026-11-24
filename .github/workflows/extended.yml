@@ -1024,6 +1024,51 @@ jobs:
           path: ffmpeg-summary.tsv
           retention-days: 1
 
+  windows-ffmpeg-n7:
+    name: Windows FFmpeg n7.1 (static codecs)
+    runs-on: windows-latest
+    timeout-minutes: 120
+    continue-on-error: true
+    needs: [ffmpeg-static-dependencies]
+    defaults:
+      run:
+        shell: msys2 {0}
+    env:
+      CC: gcc
+      CXX: g++
+      PREFIX_DIR: C:/msys64/ucrt64
+      PKG_CONFIG_PATH: /ucrt64/lib/pkgconfig
+      CHERE_INVOKING: 1
+      MSYS2_PATH_TYPE: inherit
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up MSYS2 UCRT64
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ucrt64
+          update: true
+          pacboy: >-
+            cmake gcc git meson make: nasm ninja perl pkgconf python yasm
+      - name: Download Windows static dependency outputs
+        uses: actions/download-artifact@v8.0.1
+        with:
+          pattern: ffmpeg-windows-*
+          path: ffmpeg-dependencies
+      - name: Restore installed dependency outputs
+        run: *restore-ffmpeg-static-dependencies
+      - name: Build FFmpeg n7.1
+        run: *build-ffmpeg-n7
+      - name: Upload FFmpeg summary data
+        if: always() && hashFiles('ffmpeg-summary.tsv') != ''
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: ffmpeg-summary-windows-n7
+          path: ffmpeg-summary.tsv
+          retention-days: 1
+
   ffmpeg-summary:
     name: FFmpeg output summary
     runs-on: ubuntu-latest
@@ -1032,6 +1077,7 @@ jobs:
       - linux-ffmpeg-n5
       - linux-ffmpeg-n7
       - macos-ffmpeg-n7
+      - windows-ffmpeg-n7
     if: always()
     steps:
       - name: Download FFmpeg summary data
