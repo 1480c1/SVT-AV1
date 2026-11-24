@@ -328,9 +328,9 @@ jobs:
         run: |
           cat <<EOF >> "$GITHUB_STEP_SUMMARY"
           ### GStreamer dependency revision
-          | Dependency        | Ref                          | Resolved commit                        |
-          |-------------------|------------------------------|----------------------------------------|
-          | SVT-AV1 candidate | this checkout                | \`$(git rev-parse HEAD)\`              |
+          | Dependency        | Ref                      | Resolved commit                        |
+          |-------------------|--------------------------|----------------------------------------|
+          | SVT-AV1 candidate | $GITHUB_REF_NAME         | \`$(git rev-parse HEAD)\`              |
           | GStreamer         | ${{ env.GSTREAMER_REF }} | \`$(git -C gstreamer rev-parse HEAD)\` |
           EOF
           PKG_CONFIG="pkg-config --static" meson setup \
@@ -415,11 +415,11 @@ jobs:
         run: |
           cat <<EOF >> "$GITHUB_STEP_SUMMARY"
           ### libavif dependency revisions
-          | Dependency | Ref | Resolved commit |
-          |---|---|---|
-          | SVT-AV1 candidate | this checkout | \`$(git rev-parse HEAD)\` |
-          | libavif | \`main\` | \`$(git -C libavif-src rev-parse HEAD)\` |
-          | dav1d | \`master\` | \`$(git -C dav1d-src rev-parse HEAD)\` |
+          | Dependency        | Ref              | Resolved commit                          |
+          |-------------------|------------------|------------------------------------------|
+          | SVT-AV1 candidate | $GITHUB_REF_NAME | \`$(git rev-parse HEAD)\`                |
+          | libavif           | \`main\`         | \`$(git -C libavif-src rev-parse HEAD)\` |
+          | dav1d             | \`master\`       | \`$(git -C dav1d-src rev-parse HEAD)\`   |
           EOF
           cmake \
             -S libavif-src \
@@ -591,15 +591,10 @@ jobs:
             dav1d) source_dir=dav1d-src; source_ref=master ;;
             libvpx) source_dir=libvpx-src; source_ref=main ;;
             vmaf) source_dir=vmaf-src; source_ref=master ;;
-            svtav1) source_dir=.; source_ref="this checkout" ;;
+            svtav1) source_dir=.; source_ref="$GITHUB_REF_NAME" ;;
           esac
           source_commit=$(git -C "$source_dir" rev-parse HEAD)
-          cat <<EOF >> "$GITHUB_STEP_SUMMARY"
-          ### ${DEPENDENCY} static output (${PLATFORM})
-          | Dependency | Ref | Resolved commit |
-          |---|---|---|
-          | $DEPENDENCY | ${source_ref:-this checkout} | \`$source_commit\` |
-          EOF
+          printf '%s\t%s static output\t%s\t%s\n' "$PLATFORM" "$DEPENDENCY" "${source_ref:-$GITHUB_REF_NAME}" "$source_commit" > ffmpeg-summary.tsv
       - name: Build static dependency (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
@@ -689,7 +684,7 @@ jobs:
           esac
           if [[ "$DEPENDENCY" == svtav1 ]]; then
             source_commit=$(git rev-parse HEAD)
-            source_ref="this checkout"
+            source_ref="$GITHUB_REF_NAME"
           else
             case "$DEPENDENCY" in
               aom) source_dir=aom-src; source_ref=main ;;
@@ -699,12 +694,7 @@ jobs:
             esac
             source_commit=$(git -C "$source_dir" rev-parse HEAD)
           fi
-          cat <<EOF >> "$GITHUB_STEP_SUMMARY"
-          ### ${DEPENDENCY} static output (Windows)
-          | Dependency | Ref | Resolved commit |
-          |---|---|---|
-          | $DEPENDENCY | $source_ref | $source_commit |
-          EOF
+          printf '%s\t%s static output\t%s\t%s\n' "$PLATFORM" "$DEPENDENCY" "$source_ref" "$source_commit" > ffmpeg-summary.tsv
       - name: Upload Linux and macOS libvpx output
         if: matrix.platform != 'windows' && matrix.dependency == 'libvpx'
         uses: actions/upload-artifact@v7.0.0
@@ -749,6 +739,13 @@ jobs:
           if-no-files-found: *artifact-if-no-files-found
           retention-days: *artifact-retention-days
           compression-level: *artifact-compression-level
+      - name: Upload FFmpeg summary data
+        if: always() && hashFiles('ffmpeg-summary.tsv') != ''
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: ffmpeg-summary-${{ matrix.platform }}-${{ matrix.dependency }}
+          path: ffmpeg-summary.tsv
+          retention-days: 1
 
   linux-ffmpeg-n5:
     name: Linux FFmpeg n5.0 (static SVT-AV1)
@@ -782,7 +779,7 @@ jobs:
         run: |
           git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg-src
           git -C ffmpeg-src checkout n5.0
-          echo "FFmpeg n5.0 upstream commit: $(git -C ffmpeg-src rev-parse HEAD)" | tee -a "$GITHUB_STEP_SUMMARY"
+          printf 'linux\tFFmpeg\tn5.0\t%s\n' "$(git -C ffmpeg-src rev-parse HEAD)" > ffmpeg-summary.tsv
           git -C ffmpeg-src config user.email "github-actions[bot]@users.noreply.github.com"
           git -C ffmpeg-src config user.name "GitHub Actions"
           # Patch for shr with older ffmpeg with newer binutils
@@ -813,6 +810,13 @@ jobs:
           for output in test.mkv test.mp4 test.webm test.ivf test.obu; do
             test -s "$output"
           done
+      - name: Upload FFmpeg summary data
+        if: always() && hashFiles('ffmpeg-summary.tsv') != ''
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: ffmpeg-summary-linux-n5
+          path: ffmpeg-summary.tsv
+          retention-days: 1
 
   linux-ffmpeg-n7:
     name: Linux FFmpeg n7.1 (static codecs and encode/decode)
@@ -898,8 +902,8 @@ jobs:
           set -euo pipefail
 
           git clone --depth 1 --branch n7.1 https://github.com/FFmpeg/FFmpeg.git ffmpeg-src
-          echo "FFmpeg n7.1 upstream commit: $(git -C ffmpeg-src rev-parse HEAD)" |
-            tee -a "$GITHUB_STEP_SUMMARY"
+          platform="${{ runner.os }}"
+          printf '%s\tFFmpeg\tn7.1\t%s\n' "$platform" "$(git -C ffmpeg-src rev-parse HEAD)" > ffmpeg-summary.tsv
           git -C ffmpeg-src config user.email "github-actions[bot]@users.noreply.github.com"
           git -C ffmpeg-src config user.name "GitHub Actions"
           git -C ffmpeg-src am -3 "$GITHUB_WORKSPACE/.gitlab/workflows/linux/0001-avcodec-libsvtav1-unbreak-build-with-latest-svtav1.patch"
@@ -964,6 +968,13 @@ jobs:
               -c:v libsvtav1 -svtav1-params tune=5 -f ivf tune5.ivf
             ./ffmpeg-build/ffmpeg -v error -c:v libdav1d -i tune5.ivf -f null -
           fi
+      - name: Upload FFmpeg summary data
+        if: always() && hashFiles('ffmpeg-summary.tsv') != ''
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: ffmpeg-summary-linux-n7
+          path: ffmpeg-summary.tsv
+          retention-days: 1
 
   macos-ffmpeg-n7:
     name: macOS FFmpeg n7.1 (static codecs and symbol check)
@@ -1005,6 +1016,76 @@ jobs:
           fi
       - name: Build FFmpeg n7.1
         run: *build-ffmpeg-n7
+      - name: Upload FFmpeg summary data
+        if: always() && hashFiles('ffmpeg-summary.tsv') != ''
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: ffmpeg-summary-macos-n7
+          path: ffmpeg-summary.tsv
+          retention-days: 1
+
+  ffmpeg-summary:
+    name: FFmpeg output summary
+    runs-on: ubuntu-latest
+    needs:
+      - ffmpeg-static-dependencies
+      - linux-ffmpeg-n5
+      - linux-ffmpeg-n7
+      - macos-ffmpeg-n7
+    if: always()
+    steps:
+      - name: Download FFmpeg summary data
+        uses: actions/download-artifact@v8.0.1
+        with:
+          pattern: ffmpeg-summary-*
+          path: ffmpeg-summaries
+      - name: Combine FFmpeg summaries
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          summaries=(ffmpeg-summaries/*/ffmpeg-summary.tsv)
+          {
+            cat <<'EOF'
+          ## FFmpeg build outputs
+
+          | Platform | Output | Ref | Resolved commit |
+          |----------|--------|-----|-----------------|
+          EOF
+            awk -F '\t' '
+              function display_platform(platform) {
+                if (platform == "linux") return "Linux"
+                if (platform == "macos") return "macOS"
+                if (platform == "windows") return "Windows"
+                return platform
+              }
+              NF >= 4 && $1 != "" {
+                platform = display_platform($1)
+                key = $2 SUBSEP $3 SUBSEP $4
+                if (!(key in seen)) {
+                  seen[key] = 1
+                  order[++count] = key
+                  output[key] = $2
+                  ref[key] = $3
+                  commit[key] = $4
+                }
+                platforms[key SUBSEP platform] = 1
+              }
+              END {
+                split("Linux macOS Windows", platform_order, " ")
+                for (i = 1; i <= count; i++) {
+                  key = order[i]
+                  platform_list = ""
+                  for (j = 1; j <= 3; j++) {
+                    platform = platform_order[j]
+                    if (platforms[key SUBSEP platform]) {
+                      platform_list = platform_list (platform_list == "" ? "" : "/") platform
+                    }
+                  }
+                  printf "| %s | %s | %s | `%s` |\n", platform_list, output[key], ref[key], commit[key]
+                }
+              }
+            ' "${summaries[@]}"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   linux-musl-build:
     name: Linux (Alpine/musl, Build and Encode)
