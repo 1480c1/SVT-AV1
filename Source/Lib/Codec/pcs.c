@@ -554,7 +554,7 @@ static EbErrorType picture_control_set_ctor(PictureControlSet* object_ptr, EbPtr
     object_ptr->b64_total_count       = picture_b64_width * picture_b64_height;
     object_ptr->init_b64_total_count  = object_ptr->b64_total_count;
     EB_MALLOC_ARRAY(object_ptr->sb_64x64_mvp, object_ptr->init_b64_total_count);
-    EB_MALLOC_ARRAY(object_ptr->b64_me_qindex, object_ptr->init_b64_total_count);
+    EB_CALLOC_ARRAY(object_ptr->b64_me_qindex, object_ptr->init_b64_total_count);
     if (!allintra) {
         EB_MALLOC_ARRAY(object_ptr->sb_intra, object_ptr->init_b64_total_count);
         EB_MALLOC_ARRAY(object_ptr->sb_skip, object_ptr->init_b64_total_count);
