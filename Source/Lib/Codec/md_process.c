@@ -395,7 +395,7 @@ EbErrorType svt_aom_mode_decision_context_ctor(ModeDecisionContext* ctx, Sequenc
     EB_CALLOC_ARRAY(ctx->pd0_fullpel_var, block_max_count_sb);
     // Fast Candidate Array
     uint16_t max_can_count = svt_aom_get_max_can_count(enc_mode, rtc_tune) + ind_uv_cands;
-    EB_MALLOC_ARRAY(ctx->fast_cand_array, max_can_count);
+    EB_CALLOC_ARRAY(ctx->fast_cand_array, max_can_count);
 
     for (cand_index = 0; cand_index < max_can_count; ++cand_index) {
         ctx->fast_cand_array[cand_index].palette_info = NULL;
