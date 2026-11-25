@@ -144,7 +144,7 @@ jobs:
 
   linux-gcc-release:
     name: Linux (GCC, Release)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       CC: gcc
       CXX: g++
@@ -179,8 +179,6 @@ jobs:
   linux-enc-test:
     name: Linux Enc Test
     runs-on: ubuntu-latest
-    container:
-      image: registry.gitlab.com/aomediacodec/aom-testing/ubuntu2404:20260303202728
     needs:
       - linux-gcc-release
     outputs: &encoder-test-outputs
@@ -189,15 +187,17 @@ jobs:
       chimera_m2: ${{ steps.hashes.outputs.chimera_m2 }}
       chimera_m8: ${{ steps.hashes.outputs.chimera_m8 }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - name: Download release artifacts
         uses: actions/download-artifact@v8.0.1
         with:
           name: svtav1-bin-linux-release
           path: Bin/Release
-      - name: Extract input vectors
-        run: |
-          cp /akiyo_cif.y4m.zst /Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst .
-          zstd -df akiyo_cif.y4m.zst Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
+      - name: Extract Y4M input vectors
+        uses: $/.github/actions/download-y4m
       - name: Run encoding tests
         run: |
           chmod +x Bin/Release/SvtAv1EncApp
@@ -223,11 +223,13 @@ jobs:
     name: Linux Encoder Feature Test
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    container:
-      image: registry.gitlab.com/aomediacodec/aom-testing/ubuntu2404:20260303202728
     needs:
       - linux-gcc-release
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - name: Download release artifacts
         uses: actions/download-artifact@v8.0.1
         with:
@@ -237,15 +239,10 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
-            -exec sed -i \
-              's|https\?://archive\.ubuntu\.com/ubuntu|http://azure.archive.ubuntu.com/ubuntu|g' {} +
-          apt-get update
-          apt-get install -y --no-install-recommends ffmpeg
-      - name: Extract input vectors
-        run: |
-          cp /akiyo_cif.y4m.zst /Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst /kirland_640_480_30.yuv.zst .
-          zstd -df akiyo_cif.y4m.zst Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst kirland_640_480_30.yuv.zst
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Extract Y4M input vectors
+        uses: $/.github/actions/download-y4m
       - name: Run startup mini-GOP encodes
         run: |
           chmod +x Bin/Release/SvtAv1EncApp
@@ -306,20 +303,20 @@ jobs:
   linux-rc-test:
     name: Linux RC Test
     runs-on: ubuntu-latest
-    container:
-      image: registry.gitlab.com/aomediacodec/aom-testing/ubuntu2404:20260303202728
     needs:
       - linux-gcc-release
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - name: Download release artifacts
         uses: actions/download-artifact@v7.0.0
         with:
           name: svtav1-bin-linux-release
           path: Bin/Release
-      - name: Extract input vectors
-        run: |
-          cp /akiyo_cif.y4m.zst /Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst .
-          zstd -df akiyo_cif.y4m.zst Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
+      - name: Extract Y4M input vectors
+        uses: $/.github/actions/download-y4m
       - name: Run rate control test
         run: |
           chmod +x Bin/Release/SvtAv1EncApp
@@ -355,7 +352,7 @@ jobs:
   # Skipped when pushing directly to the default branch (nothing to compare against).
   linux-gcc-default-release:
     name: Linux (GCC, Release, Default Branch)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if:
       ${{ !(github.event_name == 'push' && github.ref == format('refs/heads/{0}',
       github.event.repository.default_branch)) }}
@@ -397,21 +394,21 @@ jobs:
   linux-default-enc-test:
     name: Linux Default Enc Test
     runs-on: ubuntu-latest
-    container:
-      image: registry.gitlab.com/aomediacodec/aom-testing/ubuntu2404:20260303202728
     needs:
       - linux-gcc-default-release
     outputs: *encoder-test-outputs
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - name: Download default-branch release artifacts
         uses: actions/download-artifact@v8.0.1
         with:
           name: svtav1-bin-linux-default-release
           path: Bin/Release
-      - name: Extract input vectors
-        run: |
-          cp /akiyo_cif.y4m.zst /Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst .
-          zstd -df akiyo_cif.y4m.zst Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
+      - name: Extract Y4M input vectors
+        uses: $/.github/actions/download-y4m
       - name: Run encoding tests
         run: |
           chmod +x Bin/Release/SvtAv1EncApp
@@ -531,25 +528,17 @@ jobs:
       - macos-universal-release
     outputs: *encoder-test-outputs
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - name: Download release artifacts
         uses: actions/download-artifact@v8.0.1
         with:
           name: svtav1-bin-macos-release
           path: Bin/Release
-      - name: Extract input vectors
-        run: |
-          if [ ! -f ~/akiyo_cif.y4m.zst ]; then
-            curl -L -o ~/akiyo_cif.y4m.zst https://gitlab.com/AOMediaCodec/aom-testing/-/raw/master/test-files/akiyo_cif.y4m.zst
-          fi
-          if [ ! -f ~/Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst ]; then
-            curl -L -o ~/Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst https://gitlab.com/AOMediaCodec/aom-testing/-/raw/master/test-files/Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
-          fi
-          if [ ! -f Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m ]; then
-            zstd -df ~/Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst -o Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m
-          fi
-          if [ ! -f akiyo_cif.y4m ]; then
-            zstd -df ~/akiyo_cif.y4m.zst -o akiyo_cif.y4m
-          fi
+      - name: Download and extract input clips
+        uses: $/.github/actions/download-y4m
       - name: Run encoding tests
         run: |
           chmod +x Bin/Release/SvtAv1EncApp
@@ -615,56 +604,19 @@ jobs:
       - windows-msvc-release
     outputs: *encoder-test-outputs
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - name: Download release artifacts
         uses: actions/download-artifact@v8.0.1
         with:
           name: svtav1-bin-windows-msvc-release
           path: Bin/Release/
-      - name: Check home directory for akiyo & Chimera
-        id: home-y4m
-        run: |
-          $AkiyoZst = Join-Path $HOME "akiyo_cif.y4m.zst"
-          $ChimeraZst = Join-Path $HOME "Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst"
-          $AkiyoFound = Test-Path -LiteralPath $AkiyoZst -PathType Leaf
-          $ChimeraFound = Test-Path -LiteralPath $ChimeraZst -PathType Leaf
-
-          if ($AkiyoFound -and $ChimeraFound) {
-            Write-Host "Found both input archives in the home directory."
-            Copy-Item -LiteralPath $AkiyoZst -Destination . -Force
-            Copy-Item -LiteralPath $ChimeraZst -Destination . -Force
-            $found = "true"
-          } else {
-            Write-Host "Akiyo or Chimera input archive not found in the home directory."
-            $found = "false"
-          }
-          "found=$found" >> $env:GITHUB_OUTPUT
-      - name: Restore test inputs from cache
-        if: steps.home-y4m.outputs.found != 'true'
-        id: cache-y4m
-        uses: actions/cache/restore@v6.1.0
+      - name: Download and extract input clips
+        uses: $/.github/actions/download-y4m
         with:
-          path: |
-            akiyo_cif.y4m.zst
-            Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
-          key: y4m-clips
-          enableCrossOsArchive: true
-      - name: Decompress cached akiyo input
-        if: steps.home-y4m.outputs.found == 'true' || steps.cache-y4m.outputs.cache-hit == 'true'
-        run: |
-          zstd -df akiyo_cif.y4m.zst
-          zstd -df Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
-      - name: Download input clips from derf
-        run: |
-          if (-not (Test-Path akiyo_cif.y4m)) {
-            Write-Host "Downloading akiyo_cif.y4m from aom-testing ..."
-            Invoke-WebRequest -Uri https://gitlab.com/AOMediaCodec/aom-testing/-/raw/master/test-files/akiyo_cif.y4m.zst -OutFile akiyo_cif.y4m.zst
-            zstd -d akiyo_cif.y4m.zst
-          }
-          if (-not (Test-Path Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m)) {
-            Write-Host "Downloading Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m from aom-testing ..."
-            Invoke-WebRequest -Uri https://gitlab.com/AOMediaCodec/aom-testing/-/raw/master/test-files/Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst -OutFile Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
-            zstd -d Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
-          }
+          clips: akiyo_cif.y4m.zst Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
       - name: Run encoding tests
         run: |
           .\Bin\Release\SvtAv1EncApp.exe --preset 2 -i akiyo_cif.y4m -n 17 -b test-pr-Windows-Release-8bit-m2.ivf
@@ -675,34 +627,6 @@ jobs:
           .\Bin\Release\SvtAv1EncApp.exe --preset 8 --tune 5 -i akiyo_cif.y4m -n 120 -b test-pr-Windows-Release-8bit-m8-tune5.ivf
           .\Bin\Release\SvtAv1EncApp.exe --preset 2 --tune 5 -i Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m -n 17 -b test-pr-Windows-Release-10bit-m2-tune5.ivf
           .\Bin\Release\SvtAv1EncApp.exe --preset 8 --tune 5 -i Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m -n 120 -b test-pr-Windows-Release-10bit-m8-tune5.ivf
-      - name: Save input clips to home and cache
-        if: always()
-        run: |
-          if (-not (Test-Path akiyo_cif.y4m.zst)) {
-            zstd -T0 --ultra -20 -f akiyo_cif.y4m -o akiyo_cif.y4m.zst
-          }
-          if (-not (Test-Path Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst)) {
-            zstd -T0 --ultra -20 -f Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m -o Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
-          }
-          $AkiyoZst = "$HOME/akiyo_cif.y4m.zst"
-          if (-not (Test-Path $AkiyoZst)) {
-            Copy-Item akiyo_cif.y4m.zst $AkiyoZst
-          }
-          $ChimeraZst = "$HOME/Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst"
-          if (-not (Test-Path $ChimeraZst)) {
-            Copy-Item Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst $ChimeraZst
-          }
-      - name: Cache input clips
-        if:
-          steps.cache-y4m.outputs.cache-hit != 'true' && github.ref == format('refs/heads/{0}',
-          github.event.repository.default_branch)
-        uses: actions/cache/save@v6.1.0
-        with:
-          path: |
-            akiyo_cif.y4m.zst
-            Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
-          key: ${{ steps.cache-y4m.outputs.cache-primary-key }}
-          enableCrossOsArchive: true
       - name: Hash IVF outputs
         id: hashes
         run: |
@@ -797,56 +721,19 @@ jobs:
       - windows-ucrt64-release
     outputs: *encoder-test-outputs
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - name: Download release artifacts
         uses: actions/download-artifact@v8.0.1
         with:
           name: svtav1-bin-windows-ucrt64-release
           path: Bin/Release/
-      - name: Check home directory for akiyo & Chimera
-        id: home-y4m
-        run: |
-          $AkiyoZst = Join-Path $HOME "akiyo_cif.y4m.zst"
-          $ChimeraZst = Join-Path $HOME "Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst"
-          $AkiyoFound = Test-Path -LiteralPath $AkiyoZst -PathType Leaf
-          $ChimeraFound = Test-Path -LiteralPath $ChimeraZst -PathType Leaf
-
-          if ($AkiyoFound -and $ChimeraFound) {
-            Write-Host "Found both input archives in the home directory."
-            Copy-Item -LiteralPath $AkiyoZst -Destination . -Force
-            Copy-Item -LiteralPath $ChimeraZst -Destination . -Force
-            $found = "true"
-          } else {
-            Write-Host "Akiyo or Chimera input archive not found in the home directory."
-            $found = "false"
-          }
-          "found=$found" >> $env:GITHUB_OUTPUT
-      - name: Restore test inputs from cache
-        if: steps.home-y4m.outputs.found != 'true'
-        id: cache-y4m
-        uses: actions/cache/restore@v6.1.0
+      - name: Download and extract input clips
+        uses: $/.github/actions/download-y4m
         with:
-          path: |
-            akiyo_cif.y4m.zst
-            Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
-          key: y4m-clips
-          enableCrossOsArchive: true
-      - name: Decompress cached akiyo input
-        if: steps.home-y4m.outputs.found == 'true' || steps.cache-y4m.outputs.cache-hit == 'true'
-        run: |
-          zstd -df akiyo_cif.y4m.zst
-          zstd -df Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
-      - name: Download input clips from derf
-        run: |
-          if (-not (Test-Path akiyo_cif.y4m)) {
-            Write-Host "Downloading akiyo_cif.y4m from aom-testing ..."
-            Invoke-WebRequest -Uri https://gitlab.com/AOMediaCodec/aom-testing/-/raw/master/test-files/akiyo_cif.y4m.zst -OutFile akiyo_cif.y4m.zst
-            zstd -d akiyo_cif.y4m.zst
-          }
-          if (-not (Test-Path Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m)) {
-            Write-Host "Downloading Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m from aom-testing ..."
-            Invoke-WebRequest -Uri https://gitlab.com/AOMediaCodec/aom-testing/-/raw/master/test-files/Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst -OutFile Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
-            zstd -d Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
-          }
+          clips: akiyo_cif.y4m.zst Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
       - name: Run encoding tests
         run: |
           .\Bin\Release\SvtAv1EncApp.exe --preset 2 -i akiyo_cif.y4m -n 17 -b test-pr-Windows-ucrt64-Release-8bit-m2.ivf
@@ -857,34 +744,6 @@ jobs:
           .\Bin\Release\SvtAv1EncApp.exe --preset 8 --tune 5 -i akiyo_cif.y4m -n 120 -b test-pr-Windows-ucrt64-Release-8bit-m8-tune5.ivf
           .\Bin\Release\SvtAv1EncApp.exe --preset 2 --tune 5 -i Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m -n 17 -b test-pr-Windows-ucrt64-Release-10bit-m2-tune5.ivf
           .\Bin\Release\SvtAv1EncApp.exe --preset 8 --tune 5 -i Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m -n 120 -b test-pr-Windows-ucrt64-Release-10bit-m8-tune5.ivf
-      - name: Save input clips to home and cache
-        if: always()
-        run: |
-          if (-not (Test-Path akiyo_cif.y4m.zst)) {
-            zstd -T0 --ultra -20 -f akiyo_cif.y4m -o akiyo_cif.y4m.zst
-          }
-          if (-not (Test-Path Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst)) {
-            zstd -T0 --ultra -20 -f Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m -o Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
-          }
-          $AkiyoZst = "$HOME/akiyo_cif.y4m.zst"
-          if (-not (Test-Path $AkiyoZst)) {
-            Copy-Item akiyo_cif.y4m.zst $AkiyoZst
-          }
-          $ChimeraZst = "$HOME/Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst"
-          if (-not (Test-Path $ChimeraZst)) {
-            Copy-Item Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst $ChimeraZst
-          }
-      - name: Cache input clips
-        if:
-          steps.cache-y4m.outputs.cache-hit != 'true' && github.ref == format('refs/heads/{0}',
-          github.event.repository.default_branch)
-        uses: actions/cache/save@v6.1.0
-        with:
-          path: |
-            akiyo_cif.y4m.zst
-            Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst
-          key: ${{ steps.cache-y4m.outputs.cache-primary-key }}
-          enableCrossOsArchive: true
       - name: Hash IVF outputs
         id: hashes
         run: |

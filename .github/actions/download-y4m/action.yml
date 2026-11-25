@@ -1,0 +1,47 @@
+name: Download Y4M clips
+description: Download and extract compressed Y4M clips from aom-testing.
+inputs:
+  clips:
+    description: Space-separated names of .y4m.zst archives to download and extract.
+    required: false
+    default: akiyo_cif.y4m.zst Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m.zst kirland_640_480_30.yuv.zst
+
+runs:
+  using: composite
+  steps:
+    - name: Download and extract clips
+      if: runner.os != 'Windows'
+      shell: bash
+      env:
+        CLIPS: ${{ inputs.clips }}
+      run: |
+        for archive in $CLIPS; do
+          output="${archive%.zst}"
+          if [ ! -f "$output" ]; then
+            if [ ! -f "$archive" ]; then
+              curl -fsSL --retry 3 --retry-all-errors \
+                "https://gitlab.com/AOMediaCodec/aom-testing/-/raw/master/test-files/$archive" \
+                -o "$archive"
+            fi
+            zstd -df "$archive" -o "$output"
+          fi
+        done
+    - name: Download and extract clips
+      if: runner.os == 'Windows'
+      shell: pwsh
+      env:
+        CLIPS: ${{ inputs.clips }}
+      run: |
+        foreach ($archive in ($env:CLIPS -split '\s+' | Where-Object { $_ })) {
+          $output = $archive -replace '\.zst$', ''
+          if (-not (Test-Path -LiteralPath $output -PathType Leaf)) {
+            if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
+              $url = "https://gitlab.com/AOMediaCodec/aom-testing/-/raw/master/test-files/$archive"
+              Invoke-WebRequest -Uri $url -OutFile $archive -ErrorAction Stop
+            }
+            zstd -df $archive -o $output
+            if ($LASTEXITCODE -ne 0) {
+              exit $LASTEXITCODE
+            }
+          }
+        }
