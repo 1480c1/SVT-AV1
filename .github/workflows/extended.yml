@@ -739,13 +739,16 @@ jobs:
           if-no-files-found: *artifact-if-no-files-found
           retention-days: *artifact-retention-days
           compression-level: *artifact-compression-level
+      - name: Prepare FFmpeg summary artifact
+        if: always() && hashFiles('ffmpeg-summary.tsv') != ''
+        run: cp -- ffmpeg-summary.tsv "ffmpeg-summary-${{ matrix.platform }}-${{ matrix.dependency }}"
       - name: Upload FFmpeg summary data
         if: always() && hashFiles('ffmpeg-summary.tsv') != ''
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: ffmpeg-summary-${{ matrix.platform }}-${{ matrix.dependency }}
-          path: ffmpeg-summary.tsv
+          path: ffmpeg-summary-${{ matrix.platform }}-${{ matrix.dependency }}
           retention-days: 1
+          archive: false
 
   linux-ffmpeg-n5:
     name: Linux FFmpeg n5.0 (static SVT-AV1)
@@ -810,13 +813,16 @@ jobs:
           for output in test.mkv test.mp4 test.webm test.ivf test.obu; do
             test -s "$output"
           done
+      - name: Prepare FFmpeg summary artifact
+        if: always() && hashFiles('ffmpeg-summary.tsv') != ''
+        run: cp -- ffmpeg-summary.tsv ffmpeg-summary-linux-n5
       - name: Upload FFmpeg summary data
         if: always() && hashFiles('ffmpeg-summary.tsv') != ''
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: ffmpeg-summary-linux-n5
-          path: ffmpeg-summary.tsv
+          path: ffmpeg-summary-linux-n5
           retention-days: 1
+          archive: false
 
   linux-ffmpeg-n7:
     name: Linux FFmpeg n7.1 (static codecs and encode/decode)
@@ -968,13 +974,16 @@ jobs:
               -c:v libsvtav1 -svtav1-params tune=5 -f ivf tune5.ivf
             ./ffmpeg-build/ffmpeg -v error -c:v libdav1d -i tune5.ivf -f null -
           fi
+      - name: Prepare FFmpeg summary artifact
+        if: always() && hashFiles('ffmpeg-summary.tsv') != ''
+        run: cp -- ffmpeg-summary.tsv ffmpeg-summary-linux-n7
       - name: Upload FFmpeg summary data
         if: always() && hashFiles('ffmpeg-summary.tsv') != ''
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: ffmpeg-summary-linux-n7
-          path: ffmpeg-summary.tsv
+          path: ffmpeg-summary-linux-n7
           retention-days: 1
+          archive: false
 
   macos-ffmpeg-n7:
     name: macOS FFmpeg n7.1 (static codecs and symbol check)
@@ -1016,13 +1025,16 @@ jobs:
           fi
       - name: Build FFmpeg n7.1
         run: *build-ffmpeg-n7
+      - name: Prepare FFmpeg summary artifact
+        if: always() && hashFiles('ffmpeg-summary.tsv') != ''
+        run: cp -- ffmpeg-summary.tsv ffmpeg-summary-macos-n7
       - name: Upload FFmpeg summary data
         if: always() && hashFiles('ffmpeg-summary.tsv') != ''
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: ffmpeg-summary-macos-n7
-          path: ffmpeg-summary.tsv
+          path: ffmpeg-summary-macos-n7
           retention-days: 1
+          archive: false
 
   windows-ffmpeg-n7:
     name: Windows FFmpeg n7.1 (static codecs)
@@ -1061,13 +1073,16 @@ jobs:
         run: *restore-ffmpeg-static-dependencies
       - name: Build FFmpeg n7.1
         run: *build-ffmpeg-n7
+      - name: Prepare FFmpeg summary artifact
+        if: always() && hashFiles('ffmpeg-summary.tsv') != ''
+        run: cp -- ffmpeg-summary.tsv ffmpeg-summary-windows-n7
       - name: Upload FFmpeg summary data
         if: always() && hashFiles('ffmpeg-summary.tsv') != ''
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: ffmpeg-summary-windows-n7
-          path: ffmpeg-summary.tsv
+          path: ffmpeg-summary-windows-n7
           retention-days: 1
+          archive: false
 
   ffmpeg-summary:
     name: FFmpeg output summary
@@ -1089,7 +1104,7 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          summaries=(ffmpeg-summaries/*/ffmpeg-summary.tsv)
+          summaries=(ffmpeg-summaries/*/ffmpeg-summary-*)
           {
             cat <<'EOF'
           ## FFmpeg build outputs
