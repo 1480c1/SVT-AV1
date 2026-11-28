@@ -778,10 +778,15 @@ jobs:
           sudo cmake --install svtav1-build
           echo "PKG_CONFIG_PATH=/usr/local/lib/pkgconfig" >> "$GITHUB_ENV"
           PKG_CONFIG_PATH=/usr/local/lib/pkgconfig pkg-config --modversion SvtAv1Enc
+      - name: Checkout FFmpeg
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: FFmpeg/FFmpeg
+          ref: n5.0
+          path: ffmpeg-src
+          persist-credentials: false
       - name: Build and smoke-test FFmpeg n5.0
         run: |
-          git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg-src
-          git -C ffmpeg-src checkout n5.0
           printf 'linux\tFFmpeg\tn5.0\t%s\n' "$(git -C ffmpeg-src rev-parse HEAD)" > ffmpeg-summary.tsv
           git -C ffmpeg-src config user.email "github-actions[bot]@users.noreply.github.com"
           git -C ffmpeg-src config user.name "GitHub Actions"
@@ -903,11 +908,16 @@ jobs:
             printf 'Conflicts Found!\n%s\n' "$conflicts"
             exit 1
           fi
+      - name: Checkout FFmpeg
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: FFmpeg/FFmpeg
+          ref: n7.1
+          path: ffmpeg-src
+          persist-credentials: false
       - name: Build and smoke-test FFmpeg n7.1
         run: &build-ffmpeg-n7 |
           set -euo pipefail
-
-          git clone --depth 1 --branch n7.1 https://github.com/FFmpeg/FFmpeg.git ffmpeg-src
           platform="${{ runner.os }}"
           printf '%s\tFFmpeg\tn7.1\t%s\n' "$platform" "$(git -C ffmpeg-src rev-parse HEAD)" > ffmpeg-summary.tsv
           git -C ffmpeg-src config user.email "github-actions[bot]@users.noreply.github.com"
