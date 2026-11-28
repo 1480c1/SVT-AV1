@@ -1626,7 +1626,6 @@ jobs:
       - name: Run unit tests shard
         shell: pwsh
         run: |
-          $env:SVT_AV1_TEST_VECTOR_PATH = "${{ github.workspace }}\vectors"
           New-Item -ItemType Directory -Path "$env:USERPROFILE\.cache\gtest-parallel", reports -Force | Out-Null
           python test\gtest_parallel.py `
             --print_test_times `
